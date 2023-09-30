@@ -69,17 +69,27 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # Zooming in and out
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 4:  # Scroll up
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            
+            rel_mouse_x = (mouse_x + offset_x) / scaled_width
+            rel_mouse_y = (mouse_y + offset_y) / scaled_height
+
+            if event.button == 4:
                 zoom += ZOOM_SENSITIVITY
-                world_needs_redraw = True
-            if event.button == 5:  # Scroll down
+            if event.button == 5:
                 zoom -= ZOOM_SENSITIVITY
-                world_needs_redraw = True
+
             zoom = clamp(zoom, MIN_ZOOM, MAX_ZOOM)
 
-    # Calculate the scaled dimensions after zooming
+            scaled_width = int(SCREEN_WIDTH * zoom)
+            scaled_height = int(SCREEN_HEIGHT * zoom)
+
+            offset_x = rel_mouse_x * scaled_width - mouse_x
+            offset_y = rel_mouse_y * scaled_height - mouse_y
+
+            world_needs_redraw = True
+
     scaled_width = int(SCREEN_WIDTH * zoom)
     scaled_height = int(SCREEN_HEIGHT * zoom)
 
@@ -98,7 +108,6 @@ while running:
         offset_x += move_speed
         world_needs_redraw = True
 
-        # Hovering near the edges to move
     mouse_x, mouse_y = pygame.mouse.get_pos()
     if mouse_x <= EDGE_MARGIN:
         offset_x -= move_speed
@@ -113,7 +122,7 @@ while running:
         offset_y += move_speed
         world_needs_redraw = True
 
-    # Ensure the map does not go out of bounds
+
     offset_x = clamp(offset_x, 0, scaled_width - SCREEN_WIDTH)
     offset_y = clamp(offset_y, 0, scaled_height - SCREEN_HEIGHT)
 
@@ -121,10 +130,8 @@ while running:
         world_surface = draw_world(offset_x, offset_y, zoom)
         world_needs_redraw = False
 
-    # Clear the screen before drawing to prevent trails
     screen.fill((0, 0, 0))
 
-    # Adjust for zoom by scaling the world_surface
     screen.blit(
         pygame.transform.scale(world_surface, (scaled_width, scaled_height)), 
         (-offset_x, -offset_y)
