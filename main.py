@@ -5,7 +5,7 @@ import random
 from enum import Enum
 from diamondGeneration import get_terrain_color_array
 
-n = 1 + 2**9
+n = 4 + 2**9
 ds = 0.6
 terrain_color, screen_width, screen_height = get_terrain_color_array(n, ds)
 
