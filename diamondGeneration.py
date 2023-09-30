@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.colors
 import matplotlib.pyplot as plt
 from PIL import Image
-import cv2
 
 def fixed( d, i, j, v, offsets ):
     # For fixed bdries, all cells are valid. Define n so as to allow the
@@ -91,9 +90,9 @@ def get_terrain_color_array(size_of_terrain, roughness_delta):
     plt.axis('off')
     plt.tick_params( left=False, bottom=False, labelleft=False, labelbottom=False )
     plt.imshow( terrain, cmap=cm )
-    plt.savefig('terrain.png', bbox_inches="tight", pad_inches = 0)
+    plt.savefig('./resources/terrain.png', bbox_inches="tight", pad_inches = 0)
     colors = []
-    image = Image.open('terrain.png')
+    image = Image.open('./resources/terrain.png')
     for x in range(image.width):
         for y in range(image.height):
             colors.append(image.getpixel((x,y)))
