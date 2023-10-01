@@ -122,10 +122,10 @@ def generate_terrain(width, height):
     map_size = (width, height)
     heightmap = generate_heightmap(map_size)
     slopemap = generate_slopemap(heightmap, map_size)
-    export_texture(heightmap, slopemap, "./resources/terrain.png", map_size)
+    export_texture(heightmap, slopemap, "../resources/terrain.png", map_size)
     
     colors = []
-    image = Image.open('./resources/terrain.png')
+    image = Image.open('../resources/terrain.png')
     for x in range(image.width):
         for y in range(image.height):
             colors.append(image.getpixel((x,y)))

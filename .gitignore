@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 resources/terrain.png
 .DS_Store
+*.json

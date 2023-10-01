@@ -1,5 +1,5 @@
 import pygame
-import main
+import main as main
 import tkinter as tk
 from tkinter import filedialog
 import json
@@ -13,7 +13,7 @@ BACKGROUND_COLOR = (245, 245, 245)
 BUTTON_NORMAL_COLOR = (34, 139, 34)
 BUTTON_HOVER_COLOR = (0, 100, 0)
 BUTTON_PRESSED_COLOR = (46, 87, 46)
-AVATARS_DIR = './resources/avatars/'
+AVATARS_DIR = '../resources/avatars/'
 BUTTON_HEIGHT = 40
 BUTTON_PADDING = 20
 PROFILE_ICON_SIZE = 50
@@ -21,19 +21,19 @@ PROFILE_ICON_SIZE = 50
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("WildLogics Launcher")
 clock = pygame.time.Clock()
-button_sound = pygame.mixer.Sound('./resources/button_press.wav')
-background_image = pygame.image.load('./resources/bg.jpg').convert_alpha()
+button_sound = pygame.mixer.Sound('../resources/button_press.wav')
+background_image = pygame.image.load('../resources/bg.jpg').convert_alpha()
 
-font_path = "./resources/Monocraft.ttf"
+font_path = "../resources/Monocraft.ttf"
 title_font = pygame.font.Font(font_path, 34)
 button_font = pygame.font.Font(font_path, 20)
 input_font = pygame.font.Font(None, 32)
 
 PROFILE_FILE = 'profile.txt'
 PROFILE_PICTURE_FILE = 'profile_picture.jpg'
-DEFAULT_PICTURE = pygame.image.load('./resources/avatar.jpeg').convert_alpha()
+DEFAULT_PICTURE = pygame.image.load('../resources/avatar.jpeg').convert_alpha()
 
-PROFILE_DIR = 'user_profile'  # New Directory for profile data
+PROFILE_DIR = os.path.join(os.path.dirname(__file__), '..', 'user_profile')
 if not os.path.exists(PROFILE_DIR):
     os.makedirs(PROFILE_DIR)
 PROFILE_FILE = os.path.join(PROFILE_DIR, 'profile.json')

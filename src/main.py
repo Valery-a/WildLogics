@@ -1,7 +1,9 @@
 from pandas import wide_to_long
 import pygame
 from noise import pnoise2
-from terrain_generation import generate_terrain
+from terrain_generation import generate_terrain, COLORS
+from entity import Entity
+import random
 
 def run_game():
     n = 4 + 2**9
@@ -10,10 +12,15 @@ def run_game():
     sw = 512
     sh = 256
     TILE_SIZE = 2
-    SCREEN_WIDTH = sw* TILE_SIZE
+    SCREEN_WIDTH = sw * TILE_SIZE
     SCREEN_HEIGHT = sh * TILE_SIZE
-    
+
     terrain_color = generate_terrain(sw, sh)
+
+    entities = [
+        Entity(random.randint(0, sw-1), random.randint(0, sh-1), "grass"),
+        Entity(random.randint(0, sw-1), random.randint(0, sh-1), "water"),
+    ]
     
     EDGE_MARGIN = 20
     ZOOM_SENSITIVITY = 0.1
@@ -32,8 +39,9 @@ def run_game():
             for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
                 color = terrain_color[index]
                 pygame.draw.rect(world_surface, color, (x, y, TILE_SIZE, TILE_SIZE))
-                index+=1
-
+                index += 1
+        for entity in entities:
+            entity.draw(world_surface, TILE_SIZE)
         return world_surface
 
     zoom = 1.0
@@ -115,3 +123,6 @@ def run_game():
         clock.tick(60)
 
     pygame.quit()
+
+if __name__ == '__main__':
+    run_game()
