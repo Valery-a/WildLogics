@@ -2,6 +2,7 @@ import pygame
 import main
 import tkinter as tk
 from tkinter import filedialog
+import os
 
 pygame.init()
 
@@ -9,6 +10,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 BUTTON_NORMAL_COLOR = (34, 139, 34)
 BUTTON_HOVER_COLOR = (0, 100, 0)
 BUTTON_PRESSED_COLOR = (46, 87, 46)
+AVATARS_DIR = './resources/avatars/'
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("WildLogics Launcher")
@@ -42,16 +44,66 @@ def load_profile_picture():
     except FileNotFoundError:
         return DEFAULT_PICTURE
 
+def get_avatar_thumbnail(avatar_path, size=(50, 50)):
+    """Return a thumbnail of the avatar."""
+    img = pygame.image.load(avatar_path)
+    img = pygame.transform.scale(img, size)
+    return img
+
 def change_picture():
-    pygame.quit()  # Quit pygame temporarily
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg;*.png")])
-    root.destroy()  # Ensure tkinter is fully closed
-    if file_path:
-        img = pygame.image.load(file_path).convert_alpha()
+    # Get a list of all pre-made picture filenames
+    avatar_files = [f for f in os.listdir(AVATARS_DIR) if os.path.isfile(os.path.join(AVATARS_DIR, f)) and (f.endswith('.jpg') or f.endswith('.png'))]
+    avatar_thumbnails = [get_avatar_thumbnail(os.path.join(AVATARS_DIR, f)) for f in avatar_files]
+
+    # Create a transparent overlay
+    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))  # Semi-transparent black overlay
+    
+    # Calculate menu dimensions
+    menu_width = 300
+    menu_height = len(avatar_files) * 50 + 20  # assuming 50px height per avatar + 20px padding
+    menu_x = (SCREEN_WIDTH - menu_width) // 2
+    menu_y = (SCREEN_HEIGHT - menu_height) // 2
+    
+    # Draw the menu on the overlay
+    pygame.draw.rect(overlay, (255, 255, 255), (menu_x, menu_y, menu_width, menu_height))
+
+    running = True
+    selected_picture = None
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for index, avatar in enumerate(avatar_files):
+                    avatar_rect = pygame.Rect(menu_x, menu_y + index * 50, menu_width, 50)
+                    if avatar_rect.collidepoint(event.pos):
+                        selected_picture = os.path.join(AVATARS_DIR, avatar)
+                        running = False
+
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Blit everything
+        screen.blit(background_image, (0, 0))
+        screen.blit(overlay, (0, 0))
+
+        for index, avatar_thumbnail in enumerate(avatar_thumbnails):
+            avatar_rect = pygame.Rect(menu_x, menu_y + index * 50, menu_width, 50)
+            
+            # Change background if mouse hovers over the avatar
+            if avatar_rect.collidepoint(pygame.mouse.get_pos()):
+                pygame.draw.rect(screen, (220, 220, 220), avatar_rect)  # Light gray background
+            
+            screen.blit(avatar_thumbnail, (avatar_rect.x + 10, avatar_rect.y + 10))
+
+        pygame.display.flip()
+        clock.tick(60)
+    
+    if selected_picture:
+        img = pygame.image.load(selected_picture).convert_alpha()
         pygame.image.save(img, PROFILE_PICTURE_FILE)
-    pygame.init()  # Re-initialize pygame
+        return img  # return the loaded image
+    return None
+
 def draw_button(text, x, y, action=None):
     text_surface = button_font.render(text, True, (255, 255, 255))
     text_rect = text_surface.get_rect(center=(x, y))
@@ -107,7 +159,9 @@ def profile_screen():
         pygame.draw.rect(screen, (255, 255, 255), picture_rect, 3)
         change_picture_hovered = draw_button("Change Picture", SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 60)
         if change_picture_hovered and pygame.mouse.get_pressed()[0]:
-            change_picture()
+            new_picture = change_picture()  # get the returned image
+            if new_picture:  # if a new image was selected, update the profile_picture
+                profile_picture = new_picture
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if input_box.collidepoint(event.pos):
