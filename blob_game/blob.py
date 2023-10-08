@@ -27,6 +27,7 @@ class Blob( pygame.sprite.Sprite ):
         self.image       = self.rot_img[int( self.heading / self.min_angle ) % len( self.rot_img )]
         self.rect        = self.image.get_rect()
         self.rect.center = ( x, y )
+        self.mask = pygame.mask.from_surface(self.image)
         # movement
         self.reversing = False
         self.speed     = 0
@@ -34,7 +35,6 @@ class Blob( pygame.sprite.Sprite ):
         self.max_reverse_speed = -1.5    
         self.velocity  = pygame.math.Vector2( 0, 0 )
         self.position  = pygame.math.Vector2( x, y )
-        
         #stats
         self.energy = 100
         self.attack_power = 1
