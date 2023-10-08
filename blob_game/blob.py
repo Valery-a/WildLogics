@@ -41,6 +41,7 @@ class Blob( pygame.sprite.Sprite ):
         
     def generate_blob(self):
         blob_image = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
+        blob_image = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
         
         return blob_image
 
