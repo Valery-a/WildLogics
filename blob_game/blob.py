@@ -25,6 +25,7 @@ class Blob( pygame.sprite.Sprite ):
         # define the image used
         self.heading   = heading                           # pointing right (in radians)
         self.image       = self.rot_img[int( self.heading / self.min_angle ) % len( self.rot_img )]
+        self.blob_mouth_image = None
         self.rect        = self.image.get_rect()
         self.rect.center = ( x, y )
         self.mask = pygame.mask.from_surface(self.image)
@@ -41,7 +42,8 @@ class Blob( pygame.sprite.Sprite ):
         
     def generate_blob(self):
         blob_image = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
-        blob_image = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
+        self.blob_mouth_image = pygame.transform.scale_by(pygame.image.load( 'blob_mouth_32.png' ), 2).convert_alpha()
+        blob_image.blit(self.blob_mouth_image, (0, 0))
         
         return blob_image
 

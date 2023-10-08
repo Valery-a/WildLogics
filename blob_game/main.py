@@ -47,10 +47,11 @@ def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
             blob_sprite.position -= direction
             blob_sprite.rect.center = blob_sprite.position
 
-        blob_sprite.energy += blob_sprite.attack_power / 2
-        food_sprite.health -= blob_sprite.attack_power
-        if food_sprite.health <= 0:
-            return True
+    
+    blob_sprite.energy += blob_sprite.attack_power / 2
+    food_sprite.health -= blob_sprite.attack_power
+    if food_sprite.health <= 0:
+        return True
     return False
 
 
