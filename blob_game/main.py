@@ -6,8 +6,7 @@ from blob import Blob
 WINDOW_WIDTH    = 1200
 WINDOW_HEIGHT   = 750
 WINDOW_SURFACE  = pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE
-
-GREY_COLOR = (122, 122, 122)
+GREY_COLOR = (122, 122, 122) # used for background
 
 ### initialisation
 pygame.init()
@@ -16,12 +15,8 @@ window = pygame.display.set_mode( ( WINDOW_WIDTH, WINDOW_HEIGHT ), WINDOW_SURFAC
 pygame.display.set_caption("blob Steering")
 
 
-### Bitmaps
-blob_image  = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
-
-
 ### Sprites
-black_blob = Blob( blob_image, 300, 400, heading=5 )
+black_blob = Blob( 300, 400, heading=5 )
 blob_sprites = pygame.sprite.Group() #Single()
 blob_sprites.add( black_blob )
 

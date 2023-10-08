@@ -4,7 +4,7 @@ import math
 class Blob( pygame.sprite.Sprite ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, blob_image, x, y, rotations=360, heading = 0 ):
+    def __init__( self, x, y, rotations=360, heading = 0 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
@@ -13,12 +13,13 @@ class Blob( pygame.sprite.Sprite ):
         # Pre-make all the rotated versions
         # This assumes the start-image is pointing up-screen
         # Operation must be done in degrees (not radians)
+        self.blob_image = self.generate_blob()
         self.rot_img   = []
         self.min_angle = ( 360 / rotations ) 
         for i in range( rotations ):
             # This rotation has to match the angle in radians later
             # So offet the angle (0 degrees = "north") by 90° to be angled 0-radians (so 0 rad is "east")
-            rotated_image = pygame.transform.rotozoom( blob_image, 360-90-( i*self.min_angle ), 1 )
+            rotated_image = pygame.transform.rotozoom( self.blob_image, 360-90-( i*self.min_angle ), 1 )
             self.rot_img.append( rotated_image )
         self.min_angle = math.radians( self.min_angle )   # don't need degrees anymore
         # define the image used
@@ -33,6 +34,11 @@ class Blob( pygame.sprite.Sprite ):
         self.max_reverse_speed = -1.5    
         self.velocity  = pygame.math.Vector2( 0, 0 )
         self.position  = pygame.math.Vector2( x, y )
+        
+    def generate_blob(self):
+        blob_image  = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
+        
+        return blob_image
 
     def turn( self, angle_degrees ):
         """ Adjust the angle the blob is heading, if this means using a 
