@@ -18,7 +18,7 @@ class Food(pygame.sprite.Sprite):
         self.rect.center = ( x, y )
         self.position = pygame.math.Vector2( x, y )
         self.health = 20
-        
+        self.mask = pygame.mask.from_surface(self.image)
     def generate_food(self):
         if self.size == 5:
             food_image  = pygame.transform.scale_by(pygame.image.load( 'food_size_5_32.png' ), 2).convert_alpha()
@@ -32,14 +32,27 @@ class Food(pygame.sprite.Sprite):
     
 
 def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
-    col = pygame.sprite.collide_rect(blob_sprite, food_sprite)
-    if col == True:
+    offset_x = food_sprite.rect.x - blob_sprite.rect.x
+    offset_y = food_sprite.rect.y - blob_sprite.rect.y
+    
+    col_point = blob_sprite.mask.overlap(food_sprite.mask, (offset_x, offset_y))
+    
+    if col_point:
+        # Calculate direction vector from blob to food
+        direction = food_sprite.position - blob_sprite.position
+        direction.normalize_ip()
+
+        # Move the blob out of the collision
+        while blob_sprite.mask.overlap(food_sprite.mask, (int(food_sprite.rect.x - blob_sprite.rect.x), int(food_sprite.rect.y - blob_sprite.rect.y))):
+            blob_sprite.position -= direction
+            blob_sprite.rect.center = blob_sprite.position
+
         blob_sprite.energy += blob_sprite.attack_power / 2
         food_sprite.health -= blob_sprite.attack_power
         if food_sprite.health <= 0:
             return True
-    
     return False
+
 
 ### initialisation
 pygame.init()
