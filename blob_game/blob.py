@@ -35,8 +35,12 @@ class Blob( pygame.sprite.Sprite ):
         self.velocity  = pygame.math.Vector2( 0, 0 )
         self.position  = pygame.math.Vector2( x, y )
         
+        #stats
+        self.energy = 100
+        self.attack_power = 1
+        
     def generate_blob(self):
-        blob_image  = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
+        blob_image = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
         
         return blob_image
 
@@ -55,6 +59,7 @@ class Blob( pygame.sprite.Sprite ):
 
     def accelerate( self, amount ):
         """ Increase the speed either forward or reverse """
+        self.energy -= 0.1
         if ( not self.reversing ):
             self.speed += amount
             if self.speed > self.max_speed:
@@ -62,6 +67,7 @@ class Blob( pygame.sprite.Sprite ):
 
     def brake( self ):
         self.speed -= 0.4
+        self.energy -= 0.1
         if self.speed < self.max_reverse_speed:
             self.speed = self.max_reverse_speed
 
