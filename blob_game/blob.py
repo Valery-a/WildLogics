@@ -41,8 +41,8 @@ class Blob( pygame.sprite.Sprite ):
         self.attack_power = 1
         
     def generate_blob(self):
-        blob_image = pygame.transform.scale_by(pygame.image.load( 'blob_32.png' ), 2).convert_alpha()
-        self.blob_mouth_image = pygame.transform.scale_by(pygame.image.load( 'blob_mouth_32.png' ), 2).convert_alpha()
+        blob_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_32.png' ), 2).convert_alpha()
+        self.blob_mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), 2).convert_alpha()
         blob_image.blit(self.blob_mouth_image, (0, 0))
         
         return blob_image

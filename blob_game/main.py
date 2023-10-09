@@ -1,9 +1,11 @@
 import pygame
 import math
-from blob import Blob
 import random
 import time
+
 from pygame.locals import *
+from blob import Blob
+from food import Food
 
 # Window size
 WINDOW_WIDTH    = 1200
@@ -11,38 +13,25 @@ WINDOW_HEIGHT   = 750
 WINDOW_SURFACE  = pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE
 GREY_COLOR = (122, 122, 122) # used for background
 
-class Food(pygame.sprite.Sprite):
-    def __init__( self, x, y, size):
-        pygame.sprite.Sprite.__init__(self)
-        
-        self.size = size
-        self.image = self.generate_food()
-        self.rect = self.image.get_rect()
-        self.rect.center = ( x, y )
-        self.position = pygame.math.Vector2( x, y )
-        self.health = 20
-        self.mask = pygame.mask.from_surface(self.image)
-    def generate_food(self):
-        food_image = pygame.transform.scale(pygame.image.load('food_size_5_32.png'), (self.size * 32, self.size * 32)).convert_alpha()
 
+# Constants
+WINDOW_WIDTH = 1200
+WINDOW_HEIGHT = 750
+BORDER_WIDTH = 10
+GREY_COLOR = (122, 122, 122)  # used for background
 
-        if self.size == 5:
-            food_image = pygame.transform.scale(pygame.image.load('food_size_5_32.png'), (self.size * 32, self.size * 32)).convert_alpha()
+# Calculate the actual display size including borders
+DISPLAY_WIDTH = WINDOW_WIDTH + 2 * BORDER_WIDTH
+DISPLAY_HEIGHT = WINDOW_HEIGHT + 2 * BORDER_WIDTH
 
-        # TODO: add other food size 1 through 4
+# Initialize pygame
+pygame.init()
+pygame.mixer.init()
+window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+pygame.display.set_caption("blob Steering")
 
-        if food_image is None:
-            # Default food image if size condition is not met
-            food_image = pygame.Surface((self.size * 32, self.size * 32))
-            food_image.fill((255, 0, 0))  # Set a red color as a placeholder
-
-        return food_image
-
-        
-    def update(self):
-        self.rect.center = (self.position[0], self.position[1])
-    
-
+# Create a background surface
+background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
     offset_x = food_sprite.rect.x - blob_sprite.rect.x
     offset_y = food_sprite.rect.y - blob_sprite.rect.y
@@ -94,8 +83,14 @@ def display_energy(window, energy):
     energy_text = font.render(f"Energy: {energy}", True, (255, 255, 255))  # White text
     window.blit(energy_text, (10, 10))  # Position the text at (10, 10)
 
+def draw_borders(surface):
+    pygame.draw.rect(surface, GREY_COLOR, (0, 0, WINDOW_WIDTH, BORDER_WIDTH))
+    pygame.draw.rect(surface, GREY_COLOR, (0, 0, BORDER_WIDTH, WINDOW_HEIGHT))
+    pygame.draw.rect(surface, GREY_COLOR, (0, WINDOW_HEIGHT - BORDER_WIDTH, WINDOW_WIDTH, BORDER_WIDTH))
+    pygame.draw.rect(surface, GREY_COLOR, (WINDOW_WIDTH - BORDER_WIDTH, 0, BORDER_WIDTH, WINDOW_HEIGHT))
 
-### Main Loop
+
+# Main loop
 clock = pygame.time.Clock()
 done = False
 food_spawn_time = time.time()
@@ -107,53 +102,51 @@ while not done:
         food_sprites.add(food_sprite)
         food_spawn_time = current_time
 
-    # Handle user-input
     for event in pygame.event.get():
-        if ( event.type == pygame.QUIT ):
+        if event.type == pygame.QUIT:
             done = True
-        elif ( event.type == pygame.VIDEORESIZE ):
-            WINDOW_WIDTH  = event.w
+        elif event.type == pygame.VIDEORESIZE:
+            # Update the window size and re-calculate the display size
+            WINDOW_WIDTH = event.w
             WINDOW_HEIGHT = event.h
-            window = pygame.display.set_mode( ( WINDOW_WIDTH, WINDOW_HEIGHT ), WINDOW_SURFACE )
-        elif ( event.type == pygame.MOUSEBUTTONUP ):
-            # On mouse-click
-            pass
+            DISPLAY_WIDTH = WINDOW_WIDTH + 2 * BORDER_WIDTH
+            DISPLAY_HEIGHT = WINDOW_HEIGHT + 2 * BORDER_WIDTH
+            window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
 
-    # Continuous Movement keys
     keys = pygame.key.get_pressed()
-    if ( keys[pygame.K_LEFT] ):
-        black_blob.turn( -1.8 )  # degrees
-    if ( keys[pygame.K_RIGHT] ):
-        black_blob.turn( 1.8 )
-    if ( keys[pygame.K_UP] ):  
-        black_blob.accelerate( 0.5 )
-    if ( keys[pygame.K_DOWN] ):  
-        black_blob.brake( )
+    if keys[pygame.K_LEFT]:
+        black_blob.turn(-1.8)
+    if keys[pygame.K_RIGHT]:
+        black_blob.turn(1.8)
+    if keys[pygame.K_UP]:
+        black_blob.accelerate(0.5)
+    if keys[pygame.K_DOWN]:
+        black_blob.brake()
 
-    # Update the blob(s)
     blob_sprites.update()
     food_sprites.update()
-    
+
     for blob in blob_sprites:
         for food in food_sprites:
             if check_for_collision_between_blob_and_food(blob, food):
                 food_sprites.remove(food)
                 print(blob.energy)
-                
+
     for blob in blob_sprites:
         if blob.energy <= 0:
             blob_sprites.remove(blob)
 
     # Update the window
-    window.fill(GREY_COLOR) # backgorund
+    background_surface.fill(GREY_COLOR)
     for blob in blob_sprites:
-        display_energy(window, blob.energy)
+        display_energy(background_surface, blob.energy)
 
+    window.blit(background_surface, (BORDER_WIDTH, BORDER_WIDTH))  # Draw background with borders
     blob_sprites.draw(window)
     food_sprites.draw(window)
-    pygame.display.flip()
+    draw_borders(window)  # Draw borders on the main window
 
-    # Clamp FPS
+    pygame.display.flip()
     clock.tick_busy_loop(60)
 
 pygame.quit()
