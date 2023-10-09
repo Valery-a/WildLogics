@@ -1,6 +1,9 @@
 import pygame
 import math
 from blob import Blob
+import random
+import time
+from pygame.locals import *
 
 # Window size
 WINDOW_WIDTH    = 1200
@@ -20,12 +23,21 @@ class Food(pygame.sprite.Sprite):
         self.health = 20
         self.mask = pygame.mask.from_surface(self.image)
     def generate_food(self):
+        food_image = pygame.transform.scale(pygame.image.load('food_size_5_32.png'), (self.size * 32, self.size * 32)).convert_alpha()
+
+
         if self.size == 5:
-            food_image  = pygame.transform.scale_by(pygame.image.load( 'food_size_5_32.png' ), 2).convert_alpha()
-        
-        # TODO: add other food size 1 trough 4
-            
-        return food_image  
+            food_image = pygame.transform.scale(pygame.image.load('food_size_5_32.png'), (self.size * 32, self.size * 32)).convert_alpha()
+
+        # TODO: add other food size 1 through 4
+
+        if food_image is None:
+            # Default food image if size condition is not met
+            food_image = pygame.Surface((self.size * 32, self.size * 32))
+            food_image.fill((255, 0, 0))  # Set a red color as a placeholder
+
+        return food_image
+
         
     def update(self):
         self.rect.center = (self.position[0], self.position[1])
@@ -48,11 +60,17 @@ def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
             blob_sprite.rect.center = blob_sprite.position
 
     
-    blob_sprite.energy += blob_sprite.attack_power / 2
-    food_sprite.health -= blob_sprite.attack_power
-    if food_sprite.health <= 0:
-        return True
+        blob_sprite.energy += blob_sprite.attack_power / 2
+        food_sprite.health -= blob_sprite.attack_power
+        if food_sprite.health <= 0:
+            return True
     return False
+
+def generate_random_food():
+    x = random.randint(0, WINDOW_WIDTH)
+    y = random.randint(0, WINDOW_HEIGHT)
+    size = random.randint(1, 5)
+    return Food(x, y, size)
 
 
 ### initialisation
@@ -71,10 +89,23 @@ food = Food(350, 450, 5)
 food_sprites = pygame.sprite.Group()
 food_sprites.add(food)
 
+font = pygame.font.Font(None, 36)
+def display_energy(window, energy):
+    energy_text = font.render(f"Energy: {energy}", True, (255, 255, 255))  # White text
+    window.blit(energy_text, (10, 10))  # Position the text at (10, 10)
+
+
 ### Main Loop
 clock = pygame.time.Clock()
 done = False
+food_spawn_time = time.time()
 while not done:
+
+    current_time = time.time()
+    if current_time - food_spawn_time >= 10:
+        food_sprite = generate_random_food()
+        food_sprites.add(food_sprite)
+        food_spawn_time = current_time
 
     # Handle user-input
     for event in pygame.event.get():
@@ -115,8 +146,11 @@ while not done:
 
     # Update the window
     window.fill(GREY_COLOR) # backgorund
-    blob_sprites.draw( window )
-    food_sprites.draw( window )
+    for blob in blob_sprites:
+        display_energy(window, blob.energy)
+
+    blob_sprites.draw(window)
+    food_sprites.draw(window)
     pygame.display.flip()
 
     # Clamp FPS
