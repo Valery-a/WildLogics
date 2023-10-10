@@ -89,6 +89,20 @@ class Blob( ):
         self.energy -= 0.1
         if self.speed < self.max_reverse_speed:
             self.speed = self.max_reverse_speed
+            
+    def blob_is_eating(self, food):
+        offset_x = food.rect.x - self.rect.x
+        offset_y = food.rect.y - self.rect.y
+        mouth_mask = pygame.mask.from_surface(self.images['mouth_image'])
+        col_point = mouth_mask.overlap(food.mask, (offset_x, offset_y))
+        
+        if col_point:
+            self.energy += self.attack_power / 2
+            food.health -= self.attack_power
+            if food.health <= 0:
+                return True
+            
+        return False
 
     def update( self ):
         """ Sprite update function, calcualtes any new position """

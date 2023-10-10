@@ -46,19 +46,6 @@ def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
         while blob_sprite.body_mask.overlap(food_sprite.mask, (int(food_sprite.rect.x - blob_sprite.rect.x), int(food_sprite.rect.y - blob_sprite.rect.y))):
             blob_sprite.position -= direction
             blob_sprite.rect.center = blob_sprite.position
-            
-    offset_x = food_sprite.rect.x - blob_sprite.rect.x
-    offset_y = food_sprite.rect.y - blob_sprite.rect.y
-    mouth_mask = pygame.mask.from_surface(blob_sprite.images['mouth_image'])
-    col_point = mouth_mask.overlap(food_sprite.mask, (offset_x, offset_y))
-    
-    if col_point:
-        blob_sprite.energy += blob_sprite.attack_power / 2
-        food_sprite.health -= blob_sprite.attack_power
-        if food_sprite.health <= 0:
-            return True
-        
-    return False
 
 def generate_random_food():
     x = random.randint(0, WINDOW_WIDTH)
@@ -134,7 +121,8 @@ while not done:
 
     for blob in blob_sprites:
         for food in food_sprites:
-            if check_for_collision_between_blob_and_food(blob, food):
+            check_for_collision_between_blob_and_food(blob, food)
+            if blob.blob_is_eating(food):
                 food_sprites.remove(food)
                 print(blob.energy)
 
