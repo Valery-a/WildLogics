@@ -76,17 +76,20 @@ class Blob( ):
                 
             self.rect = self.images['full_image'].get_rect()
 
-    def accelerate( self, amount ):
+    def accelerate(self, amount):
         """ Increase the speed either forward or reverse """
-        self.energy -= 0.1
-        if ( not self.reversing ):
+        if not self.reversing:
             self.speed += amount
             if self.speed > self.max_speed:
                 self.speed = self.max_speed
+            if self.speed > 0:
+                self.energy -= 0.1
 
-    def brake( self ):
-        self.speed -= 0.4
-        self.energy -= 0.1
+    def brake(self):
+        if self.speed > self.max_reverse_speed:
+            self.speed -= 0.4
+        if self.speed < 0:
+            self.energy -= 0.1
         if self.speed < self.max_reverse_speed:
             self.speed = self.max_reverse_speed
             
@@ -106,7 +109,6 @@ class Blob( ):
 
     def update( self ):
         """ Sprite update function, calcualtes any new position """
-        self.energy -= 0.05
         lower_acceleration_speed = self.speed - 0.05
         lower_reverse_speed = self.speed + 0.05
         if self.speed > 0:
