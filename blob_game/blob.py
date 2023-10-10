@@ -128,12 +128,14 @@ class Blob( ):
 
 class BlobMenu:
     def __init__(self, blob):
-        self.blob = blob
-        self.font = pygame.font.Font(None, 36)
         self.closed = False
         self.close_menu = False
+        self.blob = blob
         self.menu_width = 200
         self.menu_height = 100
+        self.background_color = (50, 50, 50)  # Change to your preferred background color
+        self.border_color = (0, 0, 0)  # Change to your preferred border color
+        self.font = pygame.font.Font("./resources/font.ttf", 14)  # Change to your preferred font and size
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -145,8 +147,17 @@ class BlobMenu:
         menu_x = self.blob.rect.centerx
         menu_y = self.blob.rect.centery - self.blob.rect.height // 2 - self.menu_height
         menu_rect = pygame.Rect(menu_x, menu_y, self.menu_width, self.menu_height)
-        pygame.draw.rect(surface, (255, 255, 255), menu_rect, 0)
-        pygame.draw.rect(surface, (0, 0, 0), menu_rect, 2)
-        text = self.font.render(f"Energy: {self.blob.energy}", True, (0, 0, 0))
-        text_rect = text.get_rect(center=menu_rect.center)
+
+        # Draw the background
+        pygame.draw.rect(surface, self.background_color, menu_rect)
+
+        # Draw the border
+        pygame.draw.rect(surface, self.border_color, menu_rect, 2)
+
+        # Format the energy to have 4 decimal places
+        energy_text = "{:.4f}".format(self.blob.energy)
+
+        # Render text with a margin
+        text = self.font.render(f"Energy: {energy_text}", True, (255, 255, 255))  # Change text color as needed
+        text_rect = text.get_rect(center=(menu_rect.centerx, menu_rect.centery + 10))  # Add some vertical margin
         surface.blit(text, text_rect)
