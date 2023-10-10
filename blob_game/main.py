@@ -35,8 +35,7 @@ background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
     offset_x = food_sprite.rect.x - blob_sprite.rect.x
     offset_y = food_sprite.rect.y - blob_sprite.rect.y
-    
-    col_point = blob_sprite.mask.overlap(food_sprite.mask, (offset_x, offset_y))
+    col_point = blob_sprite.body_mask.overlap(food_sprite.mask, (offset_x, offset_y))
     
     if col_point:
         # Calculate direction vector from blob to food
@@ -44,15 +43,21 @@ def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
         direction.normalize_ip()
 
         # Move the blob out of the collision
-        while blob_sprite.mask.overlap(food_sprite.mask, (int(food_sprite.rect.x - blob_sprite.rect.x), int(food_sprite.rect.y - blob_sprite.rect.y))):
+        while blob_sprite.body_mask.overlap(food_sprite.mask, (int(food_sprite.rect.x - blob_sprite.rect.x), int(food_sprite.rect.y - blob_sprite.rect.y))):
             blob_sprite.position -= direction
             blob_sprite.rect.center = blob_sprite.position
-
+            
+    offset_x = food_sprite.rect.x - blob_sprite.rect.x
+    offset_y = food_sprite.rect.y - blob_sprite.rect.y
+    mouth_mask = pygame.mask.from_surface(blob_sprite.images['mouth_image'])
+    col_point = mouth_mask.overlap(food_sprite.mask, (offset_x, offset_y))
     
+    if col_point:
         blob_sprite.energy += blob_sprite.attack_power / 2
         food_sprite.health -= blob_sprite.attack_power
         if food_sprite.health <= 0:
             return True
+        
     return False
 
 def generate_random_food():
@@ -71,8 +76,8 @@ pygame.display.set_caption("blob Steering")
 
 ### Sprites
 black_blob = Blob( 200, 400, heading=5 )
-blob_sprites = pygame.sprite.Group() #Single()
-blob_sprites.add( black_blob )
+blob_sprites = [] #Single()
+blob_sprites.append( black_blob )
 
 food = Food(350, 450, 5)
 food_sprites = pygame.sprite.Group()
@@ -123,7 +128,8 @@ while not done:
     if keys[pygame.K_DOWN]:
         black_blob.brake()
 
-    blob_sprites.update()
+    for blob in blob_sprites:
+        blob.update()
     food_sprites.update()
 
     for blob in blob_sprites:
@@ -142,7 +148,9 @@ while not done:
         display_energy(background_surface, blob.energy)
 
     window.blit(background_surface, (BORDER_WIDTH, BORDER_WIDTH))  # Draw background with borders
-    blob_sprites.draw(window)
+    for blob in blob_sprites:
+        blob.draw(window)
+        
     food_sprites.draw(window)
     draw_borders(window)  # Draw borders on the main window
 
