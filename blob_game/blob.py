@@ -2,6 +2,7 @@ from turtle import position
 from networkx import center
 import pygame
 import math
+import sys
 
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
@@ -124,3 +125,28 @@ class Blob( ):
         position = (self.position[0] - self.images['full_image'].get_rect().width / 2, self.position[1] - self.images['full_image'].get_rect().height / 2)
         for name, image in self.images.items():
             win.blit(image, position)
+
+class BlobMenu:
+    def __init__(self, blob):
+        self.blob = blob
+        self.font = pygame.font.Font(None, 36)
+        self.closed = False
+        self.close_menu = False
+        self.menu_width = 200
+        self.menu_height = 100
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+    def render(self, surface):
+        menu_x = self.blob.rect.centerx
+        menu_y = self.blob.rect.centery - self.blob.rect.height // 2 - self.menu_height
+        menu_rect = pygame.Rect(menu_x, menu_y, self.menu_width, self.menu_height)
+        pygame.draw.rect(surface, (255, 255, 255), menu_rect, 0)
+        pygame.draw.rect(surface, (0, 0, 0), menu_rect, 2)
+        text = self.font.render(f"Energy: {self.blob.energy}", True, (0, 0, 0))
+        text_rect = text.get_rect(center=menu_rect.center)
+        surface.blit(text, text_rect)

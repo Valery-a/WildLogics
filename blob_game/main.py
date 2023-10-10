@@ -3,7 +3,7 @@ import math
 import random
 import time
 from pygame.locals import *
-from blob import Blob
+from blob import Blob, BlobMenu
 from food import Food
 
 WINDOW_WIDTH = 1200
@@ -89,6 +89,7 @@ def draw_minimap():
 clock = pygame.time.Clock()
 done = False
 food_spawn_time = time.time()
+blob_menus = []
 while not done:
 
     current_time = time.time()
@@ -147,6 +148,24 @@ while not done:
     draw_minimap()
     minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10
     window.blit(minimap_surface, (minimap_x, 10))
+
+    for blob in blob_sprites:
+        blob.update()
+        if blob.rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+            for menu in blob_menus:
+                if menu.blob == blob:
+                    menu.close_menu = not menu.closed
+            if not any(menu.blob == blob for menu in blob_menus):
+                blob_menus.append(BlobMenu(blob))
+
+    for menu in blob_menus:
+        menu.handle_events()
+        if menu.close_menu:
+            menu.closed = True
+            blob_menus.remove(menu)
+
+    for menu in blob_menus:
+        menu.render(window)
 
     pygame.display.flip()
     clock.tick_busy_loop(60)
