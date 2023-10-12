@@ -3,11 +3,12 @@ from networkx import center
 import pygame
 import math
 import sys
+import pymunk
 
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, rotations=360, heading = 0 ):
+    def __init__( self, x, y, space, mass=0.05, rotations=360, heading = 0 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
@@ -15,6 +16,7 @@ class Blob( ):
         # Pre-make all the rotated versions
         # This assumes the start-image is pointing up-screen
         # Operation must be done in degrees (not radians)
+        self.mass = mass
         self.images = {}
         self.generate_blob()
         self.rot_img = {}
@@ -30,14 +32,27 @@ class Blob( ):
             self.rot_img[name] = current_image_array
             
         self.min_angle = math.radians( self.min_angle )   # don't need degrees anymore
-        # define the image used
-        self.heading = heading                           # pointing right (in radians)
+        
+        # Setting up rigit body
+        self.shape = pymunk.Poly.create_box(None, (self.rot_img['full_image'][0].get_rect().width, self.rot_img['full_image'][0].get_rect().height))
+        self.moment = pymunk.moment_for_box(self.mass, (self.rot_img['full_image'][0].get_rect().width, self.rot_img['full_image'][0].get_rect().height))
+        self.body = pymunk.Body(self.mass, self.moment)  
+        self.shape.body = self.body
+        self.shape.elasticity = 0.7  # Bounciness
+        self.body.position = x, y
+        space.add(self.body, self.shape)
+        
+        # define image used
+        self.heading = self.body.angle                           # pointing right (in radians)
         self.images['full_image'] = self.rot_img['full_image'][int( self.heading / self.min_angle ) % len( self.rot_img['full_image'] )]
         self.images['mouth_image'] = self.rot_img['mouth_image'][int( self.heading / self.min_angle ) % len( self.rot_img['mouth_image'] )]
         self.images['body_image'] = self.rot_img['body_image'][int( self.heading / self.min_angle ) % len( self.rot_img['body_image'] )]
         self.rect = self.images['full_image'].get_rect()
+        
+        # masks and position
         self.body_mask = pygame.mask.from_surface(self.images['full_image'])
         self.rect.center = ( x, y )
+        
         # movement
         self.reversing = False
         self.speed = 0
@@ -45,6 +60,7 @@ class Blob( ):
         self.max_reverse_speed = -1.5    
         self.velocity = pygame.math.Vector2( 0, 0 )
         self.position = pygame.math.Vector2( x, y )
+        
         #stats
         self.energy = 100
         self.attack_power = 1
@@ -65,7 +81,9 @@ class Blob( ):
     def turn( self, angle_degrees ):
         """ Adjust the angle the blob is heading, if this means using a 
             different blob-image, select that here too """
-        self.heading += math.radians( angle_degrees ) 
+        
+        self.body.angle += angle_degrees
+        self.heading = self.body.angle
         # Decide which is the correct image to display
         image_index = int( self.heading / self.min_angle ) % len( self.rot_img['full_image'] )
         # Only update the image if it's changed
@@ -124,7 +142,7 @@ class Blob( ):
         self.position += self.velocity
         position = (self.position[0] - self.images['full_image'].get_rect().width / 2, self.position[1] - self.images['full_image'].get_rect().height / 2)
         for name, image in self.images.items():
-            win.blit(image, position)
+            win.blit(image, (self.body.position.x - self.images['full_image'].get_rect().width / 2, self.body.position.y - self.images['full_image'].get_rect().height / 2))
 
 class BlobMenu:
     def __init__(self, blob):

@@ -5,6 +5,8 @@ import time
 from pygame.locals import *
 from blob import Blob, BlobMenu
 from food import Food
+import pymunk
+from pymunk.pygame_util import DrawOptions
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 750
@@ -20,21 +22,12 @@ pygame.mixer.init()
 window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
 pygame.display.set_caption("blob Steering")
 
-background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+space = pymunk.Space()
+space.gravity = (0, 0)  # Set the gravity (adjust as needed)
+space.damping = 0.01
+draw_options = DrawOptions(window)
 
-def check_for_collision_between_blob_and_food(blob_sprite, food_sprite):
-    offset_x = food_sprite.rect.x - blob_sprite.rect.x
-    offset_y = food_sprite.rect.y - blob_sprite.rect.y
-    col_point = blob_sprite.body_mask.overlap(food_sprite.mask, (offset_x, offset_y))
-    
-    if col_point:
-        direction = food_sprite.position - blob_sprite.position
-        direction.normalize_ip()
-        while blob_sprite.body_mask.overlap(food_sprite.mask,
-                                            (int(food_sprite.rect.x - blob_sprite.rect.x),
-                                             int(food_sprite.rect.y - blob_sprite.rect.y))):
-            blob_sprite.position -= direction
-            blob_sprite.rect.center = blob_sprite.position
+background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 def generate_random_food():
     x = random.randint(0, WINDOW_WIDTH)
@@ -47,7 +40,7 @@ pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_SURFACE)
 pygame.display.set_caption("blob Steering")
 
-black_blob = Blob(200, 400, heading=5)
+black_blob = Blob(200, 400, space, heading=5)
 blob_sprites = []
 blob_sprites.append(black_blob)
 
@@ -111,9 +104,9 @@ while not done:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        black_blob.turn(-1.8)
+        black_blob.turn(-0.05)
     if keys[pygame.K_RIGHT]:
-        black_blob.turn(1.8)
+        black_blob.turn(0.05)
     if keys[pygame.K_UP]:
         black_blob.accelerate(0.5)
     if keys[pygame.K_DOWN]:
@@ -125,7 +118,6 @@ while not done:
 
     for blob in blob_sprites:
         for food in food_sprites:
-            check_for_collision_between_blob_and_food(blob, food)
             if blob.blob_is_eating(food):
                 food_sprites.remove(food)
                 print(blob.energy)
@@ -139,8 +131,10 @@ while not done:
         display_energy(background_surface, blob.energy)
 
     window.blit(background_surface, (BORDER_WIDTH, BORDER_WIDTH))
+    space.debug_draw(draw_options)
     for blob in blob_sprites:
         blob.draw(window)
+        
 
     food_sprites.draw(window)
     draw_borders(window)
@@ -167,6 +161,8 @@ while not done:
     for menu in blob_menus:
         menu.render(window)
 
+    # Step the Pymunk space
+    space.step(1 / 60.0)  # 60 FPS
     pygame.display.flip()
     clock.tick_busy_loop(60)
 
