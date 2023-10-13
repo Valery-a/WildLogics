@@ -58,8 +58,7 @@ class Blob( ):
         self.speed = 0
         self.max_speed = 20
         self.max_reverse_speed = -self.max_speed / 2    
-        self.velocity = pygame.math.Vector2( 0, 0 )
-        self.position = pygame.math.Vector2( x, y )
+        self.position = pygame.math.Vector2( self.body.position.x, self.body.position.y )
         
         #stats
         self.energy = 100
@@ -129,12 +128,7 @@ class Blob( ):
         else:
             self.speed = min(lower_reverse_speed, 0)
         
-        self.rect.center = ( round(self.position[0]), round(self.position[1] ) )
-        
     def draw(self, win):
-        self.velocity.from_polar( ( self.speed, math.degrees( self.heading ) ) )
-        self.position += self.velocity
-        position = (self.position[0] - self.images['full_image'].get_rect().width / 2, self.position[1] - self.images['full_image'].get_rect().height / 2)
         for name, image in self.images.items():
             win.blit(image, (self.body.position.x - self.images['full_image'].get_rect().width / 2, self.body.position.y - self.images['full_image'].get_rect().height / 2))
 
