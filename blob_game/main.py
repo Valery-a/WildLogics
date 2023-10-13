@@ -134,9 +134,9 @@ while not done:
     for blob in blob_sprites:
         blob.draw(window)
         
-
     for food in food_sprites:
         food.draw(window)
+        
     draw_borders(window)
 
     draw_minimap()

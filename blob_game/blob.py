@@ -8,7 +8,7 @@ import pymunk
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 2 ):
+    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 6 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
@@ -38,15 +38,31 @@ class Blob( ):
         
         # Setting up rigid body
         self.mass = mass
-        body_size = (self.rot_img['full_image'][0].get_rect().width * 0.60, self.rot_img['full_image'][0].get_rect().height * 0.46)
-        self.shape = pymunk.Poly.create_box(None, body_size)
-        self.moment = pymunk.moment_for_box(self.mass, body_size)
+        width = self.rot_img['full_image'][0].get_rect().width * 0.60
+        height = self.rot_img['full_image'][0].get_rect().height * 0.46
+        body_size = [
+            (-width / 2, -height / 2), 
+            (width / 2, -height / 2), 
+            (width / 2, height / 2), 
+            (-width / 2, height / 2)
+            ]
+        self.shape = pymunk.Poly(None, body_size)
+        self.moment = pymunk.moment_for_poly(self.mass, body_size)
         self.body = pymunk.Body(self.mass, self.moment)  
         self.shape.body = self.body
         self.shape.elasticity = 0.7  # Bounciness
         self.body.position = x, y
+        
+        body_size = [
+            (width / 2 , -height / 5), 
+            (width / 2 + width * 0.1, -height / 5), 
+            (width / 2 + width * 0.1, height / 5), 
+            (width / 2, height / 5)
+            ]
+        self.mouth_shape = pymunk.Poly(self.body, body_size)
+        space.add(self.body, self.shape, self.mouth_shape)
+        
         self.body.angle = heading
-        space.add(self.body, self.shape)
         
         # define image used
         self.heading = self.body.angle                           # pointing right (in radians)
@@ -129,6 +145,8 @@ class Blob( ):
             self.speed = max(lower_acceleration_speed, 0)
         else:
             self.speed = min(lower_reverse_speed, 0)
+            
+        self.turn(0)
         
     def draw(self, win):
         for name, image in self.images.items():
