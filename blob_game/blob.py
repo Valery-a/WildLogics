@@ -56,8 +56,8 @@ class Blob( ):
         # movement
         self.reversing = False
         self.speed = 0
-        self.max_speed = 4
-        self.max_reverse_speed = -1.5    
+        self.max_speed = 20
+        self.max_reverse_speed = -self.max_speed / 2    
         self.velocity = pygame.math.Vector2( 0, 0 )
         self.position = pygame.math.Vector2( x, y )
         
@@ -97,20 +97,14 @@ class Blob( ):
 
     def accelerate(self, amount):
         """ Increase the speed either forward or reverse """
-        if not self.reversing:
-            self.speed += amount
-            if self.speed > self.max_speed:
-                self.speed = self.max_speed
-            if self.speed > 0:
-                self.energy -= 0.1
-
-    def brake(self):
-        if self.speed > self.max_reverse_speed:
-            self.speed -= 0.4
-        if self.speed < 0:
-            self.energy -= 0.1
+        self.speed += amount
+        if self.speed > self.max_speed:
+            self.speed = self.max_speed
         if self.speed < self.max_reverse_speed:
             self.speed = self.max_reverse_speed
+        if self.speed > 0:
+            self.energy -= 0.1
+        self.body.apply_force_at_local_point((self.speed, 0), (0, 0))
             
     def blob_is_eating(self, food):
         offset_x = food.rect.x - self.rect.x

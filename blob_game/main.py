@@ -110,7 +110,7 @@ while not done:
     if keys[pygame.K_UP]:
         black_blob.accelerate(0.5)
     if keys[pygame.K_DOWN]:
-        black_blob.brake()
+        black_blob.accelerate(-0.5)
 
     for blob in blob_sprites:
         blob.update()
