@@ -8,14 +8,17 @@ import pymunk
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.05, rotations=360, heading = 0 ):
+    def __init__( self, x, y, space, mass=0.05, rotations=360, heading = 0, size = 2 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
             The base blob-image should be pointing North/Up.          """
-        # Pre-make all the rotated versions
-        # This assumes the start-image is pointing up-screen
-        # Operation must be done in degrees (not radians)
+        
+        #stats
+        self.energy = 100
+        self.attack_power = 1
+        self.size = size
+        
         self.mass = mass
         self.images = {}
         self.generate_blob()
@@ -34,7 +37,7 @@ class Blob( ):
         self.min_angle = math.radians( self.min_angle )   # don't need degrees anymore
         
         # Setting up rigit body
-        body_size = (self.rot_img['full_image'][0].get_rect().width * 0.7, self.rot_img['full_image'][0].get_rect().height * 0.5)
+        body_size = (self.rot_img['full_image'][0].get_rect().width * 0.60, self.rot_img['full_image'][0].get_rect().height * 0.46)
         self.shape = pymunk.Poly.create_box(None, body_size)
         self.moment = pymunk.moment_for_box(self.mass, body_size)
         self.body = pymunk.Body(self.mass, self.moment)  
@@ -62,13 +65,9 @@ class Blob( ):
         self.max_reverse_speed = -self.max_speed / 2    
         self.position = pygame.math.Vector2( self.body.position.x, self.body.position.y )
         
-        #stats
-        self.energy = 100
-        self.attack_power = 1
-        
     def generate_blob(self):
-        body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_32.png' ), 2).convert_alpha()
-        mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), 2).convert_alpha()
+        body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_32.png' ), self.size).convert_alpha()
+        mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), self.size).convert_alpha()
         self.images['body_image'] = body_image
         self.images['mouth_image'] = mouth_image
         

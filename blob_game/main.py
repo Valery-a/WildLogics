@@ -40,7 +40,7 @@ pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_SURFACE)
 pygame.display.set_caption("blob Steering")
 
-black_blob = Blob(200, 400, space, heading=5)
+black_blob = Blob(200, 400, space)
 blob_sprites = []
 blob_sprites.append(black_blob)
 
