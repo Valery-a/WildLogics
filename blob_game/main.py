@@ -125,6 +125,7 @@ while not done:
     for blob in blob_sprites:
         if blob.energy <= 0:
             blob_sprites.remove(blob)
+            space.remove(blob.body, blob.shape)
 
     background_surface.fill(GREY_COLOR)
     for blob in blob_sprites:

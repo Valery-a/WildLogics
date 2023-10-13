@@ -34,12 +34,14 @@ class Blob( ):
         self.min_angle = math.radians( self.min_angle )   # don't need degrees anymore
         
         # Setting up rigit body
-        self.shape = pymunk.Poly.create_box(None, (self.rot_img['full_image'][0].get_rect().width, self.rot_img['full_image'][0].get_rect().height))
-        self.moment = pymunk.moment_for_box(self.mass, (self.rot_img['full_image'][0].get_rect().width, self.rot_img['full_image'][0].get_rect().height))
+        body_size = (self.rot_img['full_image'][0].get_rect().width * 0.7, self.rot_img['full_image'][0].get_rect().height * 0.5)
+        self.shape = pymunk.Poly.create_box(None, body_size)
+        self.moment = pymunk.moment_for_box(self.mass, body_size)
         self.body = pymunk.Body(self.mass, self.moment)  
         self.shape.body = self.body
         self.shape.elasticity = 0.7  # Bounciness
         self.body.position = x, y
+        self.body.angle = heading
         space.add(self.body, self.shape)
         
         # define image used
