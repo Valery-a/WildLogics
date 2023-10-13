@@ -33,7 +33,7 @@ def generate_random_food():
     x = random.randint(0, WINDOW_WIDTH)
     y = random.randint(0, WINDOW_HEIGHT)
     size = random.randint(1, 5)
-    return Food(x, y, size)
+    return Food(x, y, space, size)
 
 pygame.init()
 pygame.mixer.init()
@@ -44,9 +44,9 @@ black_blob = Blob(200, 400, space)
 blob_sprites = []
 blob_sprites.append(black_blob)
 
-food = Food(350, 450, 5)
-food_sprites = pygame.sprite.Group()
-food_sprites.add(food)
+food = Food(350, 450, space, 5)
+food_sprites = []
+food_sprites.append(food)
 
 font = pygame.font.Font(None, 36)
 
@@ -74,8 +74,8 @@ def draw_minimap():
 
     for food in food_sprites:
         pygame.draw.circle(minimap_surface, (0, 255, 0),
-                           (int(food.position.x * MINIMAP_WIDTH / WINDOW_WIDTH),
-                            int(food.position.y * MINIMAP_HEIGHT / WINDOW_HEIGHT)), 2)
+                           (int(food.body.position.x * MINIMAP_WIDTH / WINDOW_WIDTH),
+                            int(food.body.position.y * MINIMAP_HEIGHT / WINDOW_HEIGHT)), 2)
     
     pygame.draw.rect(minimap_surface, (255, 255, 255), (0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT), 2)
 
@@ -88,7 +88,7 @@ while not done:
     current_time = time.time()
     if current_time - food_spawn_time >= 10:
         food_sprite = generate_random_food()
-        food_sprites.add(food_sprite)
+        food_sprites.append(food_sprite)
         food_spawn_time = current_time
 
     for event in pygame.event.get():
@@ -114,13 +114,11 @@ while not done:
 
     for blob in blob_sprites:
         blob.update()
-    food_sprites.update()
 
     for blob in blob_sprites:
         for food in food_sprites:
             if blob.blob_is_eating(food):
                 food_sprites.remove(food)
-                print(blob.energy)
 
     for blob in blob_sprites:
         if blob.energy <= 0:
@@ -137,7 +135,8 @@ while not done:
         blob.draw(window)
         
 
-    food_sprites.draw(window)
+    for food in food_sprites:
+        food.draw(window)
     draw_borders(window)
 
     draw_minimap()

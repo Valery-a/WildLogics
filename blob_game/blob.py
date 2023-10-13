@@ -8,18 +8,18 @@ import pymunk
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.05, rotations=360, heading = 0, size = 2 ):
+    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 2 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
             The base blob-image should be pointing North/Up.          """
         
-        #stats
+        # stats
         self.energy = 100
         self.attack_power = 1
         self.size = size
         
-        self.mass = mass
+        # setting up blob images
         self.images = {}
         self.generate_blob()
         self.rot_img = {}
@@ -36,7 +36,8 @@ class Blob( ):
             
         self.min_angle = math.radians( self.min_angle )   # don't need degrees anymore
         
-        # Setting up rigit body
+        # Setting up rigid body
+        self.mass = mass
         body_size = (self.rot_img['full_image'][0].get_rect().width * 0.60, self.rot_img['full_image'][0].get_rect().height * 0.46)
         self.shape = pymunk.Poly.create_box(None, body_size)
         self.moment = pymunk.moment_for_box(self.mass, body_size)
