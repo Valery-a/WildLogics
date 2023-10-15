@@ -23,7 +23,7 @@ window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.HWSURFA
 pygame.display.set_caption("blob Steering")
 
 space = pymunk.Space()
-space.gravity = (0, 0)  # Set the gravity (adjust as needed)
+space.gravity = (0, 0)
 space.damping = 0.01
 draw_options = DrawOptions(window)
 
@@ -119,6 +119,7 @@ while not done:
         for food in food_sprites:
             if blob.blob_is_eating(food):
                 food_sprites.remove(food)
+                space.remove(food.shape, food.body)
 
     for blob in blob_sprites:
         if blob.energy <= 0:

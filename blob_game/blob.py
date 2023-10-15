@@ -51,8 +51,7 @@ class Blob( ):
         self.body = pymunk.Body(self.mass, self.moment)  
         self.shape.body = self.body
         self.shape.elasticity = 0.7  # Bounciness
-        self.body.position = x, y
-        
+        self.body.position = x, y     
         body_size = [
             (width / 2 , -height / 5), 
             (width / 2 + width * 0.1, -height / 5), 
@@ -60,8 +59,7 @@ class Blob( ):
             (width / 2, height / 5)
             ]
         self.mouth_shape = pymunk.Poly(self.body, body_size)
-        space.add(self.body, self.shape, self.mouth_shape)
-        
+        space.add(self.body, self.shape, self.mouth_shape)     
         self.body.angle = heading
         
         # define image used
@@ -124,15 +122,10 @@ class Blob( ):
         self.body.apply_force_at_local_point((self.speed, 0), (0, 0))
             
     def blob_is_eating(self, food):
-        offset_x = food.rect.x - self.rect.x
-        offset_y = food.rect.y - self.rect.y
-        mouth_mask = pygame.mask.from_surface(self.images['mouth_image'])
-        col_point = mouth_mask.overlap(food.mask, (offset_x, offset_y))
-        
-        if col_point:
+        if self.mouth_shape.shapes_collide(food.shape).normal != pymunk.Vec2d(-0,-0):
             self.energy += self.attack_power / 2
             food.health -= self.attack_power
-            if food.health <= 0:
+            if food.health < 0:
                 return True
             
         return False
