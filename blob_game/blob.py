@@ -4,6 +4,7 @@ import pygame
 import math
 import sys
 import pymunk
+from pymunk.autogeometry import march_hard, simplify_curves
 
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
@@ -40,22 +41,17 @@ class Blob( ):
         self.mass = mass
         width = self.rot_img['full_image'][0].get_rect().width * 0.60
         height = self.rot_img['full_image'][0].get_rect().height * 0.46
-        body_size = [
-            (-width / 2, -height / 2), 
-            (width / 2, -height / 2), 
-            (width / 2, height / 2), 
-            (-width / 2, height / 2)
-            ]
-        self.shape = pymunk.Poly(None, body_size)
-        self.moment = pymunk.moment_for_poly(self.mass, body_size)
+        points = self.generate_geometry_points(self.rot_img['body_image'][0])
+        self.shape = pymunk.Poly(None, points)
+        self.moment = pymunk.moment_for_poly(self.mass, points)
         self.body = pymunk.Body(self.mass, self.moment)  
         self.shape.body = self.body
         self.shape.elasticity = 0.7  # Bounciness
         self.body.position = x, y     
         body_size = [
             (width / 2 , -height / 5), 
-            (width / 2 + width * 0.1, -height / 5), 
-            (width / 2 + width * 0.1, height / 5), 
+            (width / 2 + width * 0.05, -height / 5), 
+            (width / 2 + width * 0.05, height / 5), 
             (width / 2, height / 5)
             ]
         self.mouth_shape = pymunk.Poly(self.body, body_size)
@@ -92,6 +88,24 @@ class Blob( ):
             
         self.images['full_image'] = full_image.convert_alpha()
 
+    def generate_geometry_points(self, surface):
+        def sample_func(point):
+            p = int(point[0]), int(point[1])
+            color = surface.get_at(p)
+            return color.hsla[2]
+
+        line_set = march_hard(
+            pymunk.BB(0, 0, surface.get_width()-1, surface.get_height()-1), 200, 200, 1, sample_func
+        )
+        
+        points = []
+        for polyline in line_set:
+            line = simplify_curves(polyline, 1.0)
+            for i in range(len(line) - 1):
+                p1 = line[i]
+                points.append((p1.x - surface.get_rect().width / 2, p1.y - surface.get_rect().height / 2))
+        
+        return points
 
     def turn( self, angle_degrees ):
         """ Adjust the angle the blob is heading, if this means using a 
