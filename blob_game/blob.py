@@ -39,19 +39,18 @@ class Blob( ):
         
         # Setting up rigid body
         self.mass = mass
-        width = self.rot_img['full_image'][0].get_rect().width * 0.60
+        width = self.rot_img['full_image'][0].get_rect().width * 0.3
         height = self.rot_img['full_image'][0].get_rect().height * 0.46
-        points = self.generate_geometry_points(self.rot_img['body_image'][0])
-        self.shape = pymunk.Poly(None, points)
-        self.moment = pymunk.moment_for_poly(self.mass, points)
+        self.shape = pymunk.Circle(None, width)
+        self.moment = pymunk.moment_for_circle(self.mass, 0, width)
         self.body = pymunk.Body(self.mass, self.moment)  
         self.shape.body = self.body
         self.shape.elasticity = 0.7  # Bounciness
         self.body.position = x, y     
         body_size = [
             (width / 2 , -height / 5), 
-            (width / 2 + width * 0.05, -height / 5), 
-            (width / 2 + width * 0.05, height / 5), 
+            (width / 2 + width * 0.5, -height / 5), 
+            (width / 2 + width * 0.5, height / 5), 
             (width / 2, height / 5)
             ]
         self.mouth_shape = pymunk.Poly(self.body, body_size)
@@ -61,7 +60,7 @@ class Blob( ):
         # define image used
         self.heading = self.body.angle                           # pointing right (in radians)
         self.images['full_image'] = self.rot_img['full_image'][int( self.heading / self.min_angle ) % len( self.rot_img['full_image'] )]
-        self.images['mouth_image'] = self.rot_img['mouth_image'][int( self.heading / self.min_angle ) % len( self.rot_img['mouth_image'] )]
+        #self.images['mouth_image'] = self.rot_img['mouth_image'][int( self.heading / self.min_angle ) % len( self.rot_img['mouth_image'] )]
         self.images['body_image'] = self.rot_img['body_image'][int( self.heading / self.min_angle ) % len( self.rot_img['body_image'] )]
         self.rect = self.images['full_image'].get_rect()
         
@@ -77,10 +76,10 @@ class Blob( ):
         self.position = pygame.math.Vector2( self.body.position.x, self.body.position.y )
         
     def generate_blob(self):
-        body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_32.png' ), self.size).convert_alpha()
-        mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), self.size).convert_alpha()
+        body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_circle.png' ), self.size).convert_alpha()
+        #mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), self.size).convert_alpha()
         self.images['body_image'] = body_image
-        self.images['mouth_image'] = mouth_image
+        #self.images['mouth_image'] = mouth_image
         
         full_image = body_image.copy()
         for name, image in self.images.items():
@@ -119,7 +118,7 @@ class Blob( ):
         if ( self.images['full_image'] != self.rot_img['full_image'][ image_index ] ):
             for name, image in self.rot_img.items():
                 self.images['full_image'] = self.rot_img['full_image'][ image_index ]
-                self.images['mouth_image'] = self.rot_img['mouth_image'][ image_index ]
+                #self.images['mouth_image'] = self.rot_img['mouth_image'][ image_index ]
                 self.images['body_image'] = self.rot_img['body_image'][ image_index ]
                 
             self.rect = self.images['full_image'].get_rect()
