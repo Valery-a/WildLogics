@@ -24,7 +24,7 @@ pygame.display.set_caption("blob Steering")
 
 space = pymunk.Space()
 space.gravity = (0, 0)
-space.damping = 0.01
+space.damping = 0.001
 draw_options = DrawOptions(window)
 
 background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -32,7 +32,7 @@ background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 def generate_random_food():
     x = random.randint(0, WINDOW_WIDTH)
     y = random.randint(0, WINDOW_HEIGHT)
-    size = random.randint(1, 5)
+    size = random.uniform(1, 1.5)
     return Food(x, y, space, size)
 
 pygame.init()
@@ -121,10 +121,10 @@ while not done:
                 food_sprites.remove(food)
                 space.remove(food.shape, food.body)
 
-    for blob in blob_sprites:
+    for i, blob in enumerate(blob_sprites):
         if blob.energy <= 0:
-            blob_sprites.remove(blob)
-            space.remove(blob.body, blob.shape)
+            blob_sprites.pop(i)
+            space.remove(blob.body, blob.shape, blob.mouth_shape)
 
     background_surface.fill(GREY_COLOR)
     for blob in blob_sprites:

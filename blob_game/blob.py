@@ -9,7 +9,7 @@ from pymunk.autogeometry import march_hard, simplify_curves
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 6 ):
+    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 3, view_distance = 20, view_angle = 45 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
@@ -19,6 +19,8 @@ class Blob( ):
         self.energy = 100
         self.attack_power = 1
         self.size = size
+        self.view_distance = view_distance * size
+        self.view_angle = view_angle
         
         # setting up blob images
         self.images = {}
@@ -54,7 +56,18 @@ class Blob( ):
             (width / 2, height / 5)
             ]
         self.mouth_shape = pymunk.Poly(self.body, body_size)
-        space.add(self.body, self.shape, self.mouth_shape)     
+        points = []
+        starting_angle = -self.view_angle
+        p = (0, self.view_distance)
+        for i in range(self.view_angle * 2):
+            theta = (starting_angle * (math.pi / 180))
+            p_prime = (round((p[0]*math.cos(theta)-p[1]*math.sin(theta)), 2), round((p[0]*math.sin(theta)+ p[1]*math.cos(theta)), 2))
+            points.append(p_prime)
+            starting_angle -= 1
+            
+        points.append((size * 5, 0))
+        self.field_of_view_shape = pymunk.Poly(self.body, points)
+        space.add(self.body, self.shape, self.mouth_shape, self.field_of_view_shape)     
         self.body.angle = heading
         
         # define image used
@@ -71,7 +84,7 @@ class Blob( ):
         # movement
         self.reversing = False
         self.speed = 0
-        self.max_speed = 20
+        self.max_speed = 10
         self.max_reverse_speed = -self.max_speed / 2    
         self.position = pygame.math.Vector2( self.body.position.x, self.body.position.y )
         
