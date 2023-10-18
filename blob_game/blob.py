@@ -21,6 +21,7 @@ class Blob( ):
         self.size = size
         self.view_distance = view_distance * size
         self.view_angle = view_angle
+        self.current_nearest_object_distance = 0
         
         # setting up blob images
         self.images = {}
@@ -157,7 +158,23 @@ class Blob( ):
                 return True
             
         return False
-
+    
+    def nearest_object(self, objects):
+        found_object = False
+        for object in objects:
+            distance_to_object = self.field_of_view_shape.point_query(object.body.position)
+            a = object.body.position.y - self.body.position.y
+            b = self.body.position.x - object.body.position.x
+            cos_angle = b / (+(math.sqrt(math.pow(a,2) + math.pow(b, 2))))
+            print(cos_angle)
+            if distance_to_object.distance <= self.current_nearest_object_distance:
+                found_object = True
+                self.current_nearest_object_distance = distance_to_object.distance
+        
+        if not found_object:
+            self.current_nearest_object_distance = 0
+            
+            
     def update( self ):
         """ Sprite update function, calcualtes any new position """
         lower_acceleration_speed = self.speed - 0.05

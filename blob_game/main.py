@@ -87,8 +87,8 @@ while not done:
 
     current_time = time.time()
     if current_time - food_spawn_time >= 10:
-        food_sprite = generate_random_food()
-        food_sprites.append(food_sprite)
+        #food_sprite = generate_random_food()
+        #food_sprites.append(food_sprite)
         food_spawn_time = current_time
 
     for event in pygame.event.get():
@@ -120,11 +120,14 @@ while not done:
             if blob.blob_is_eating(food):
                 food_sprites.remove(food)
                 space.remove(food.shape, food.body)
+                
+    for blob in blob_sprites:
+        blob.nearest_object(food_sprites)
 
     for i, blob in enumerate(blob_sprites):
         if blob.energy <= 0:
             blob_sprites.pop(i)
-            space.remove(blob.body, blob.shape, blob.mouth_shape)
+            space.remove(blob.body, blob.shape, blob.mouth_shape, blob.field_of_view_shape)
 
     background_surface.fill(GREY_COLOR)
     for blob in blob_sprites:
@@ -165,6 +168,6 @@ while not done:
     # Step the Pymunk space
     space.step(1 / 60.0)  # 60 FPS
     pygame.display.flip()
-    clock.tick_busy_loop(60)
+    clock.tick(60)
 
 pygame.quit()
