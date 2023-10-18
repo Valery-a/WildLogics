@@ -9,7 +9,7 @@ from pymunk.autogeometry import march_hard, simplify_curves
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 3, view_distance = 20, view_angle = 45 ):
+    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 3, view_distance = 30, view_angle = 20 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
@@ -57,7 +57,7 @@ class Blob( ):
             ]
         self.mouth_shape = pymunk.Poly(self.body, body_size)
         points = []
-        starting_angle = -self.view_angle
+        starting_angle = -(90 - self.view_angle)
         p = (0, self.view_distance)
         for i in range(self.view_angle * 2):
             theta = (starting_angle * (math.pi / 180))
@@ -65,9 +65,11 @@ class Blob( ):
             points.append(p_prime)
             starting_angle -= 1
             
-        points.append((size * 5, 0))
+        points.append((0, 0))
         self.field_of_view_shape = pymunk.Poly(self.body, points)
+        self.field_of_view_shape.filter = pymunk.ShapeFilter(0, 0)
         space.add(self.body, self.shape, self.mouth_shape, self.field_of_view_shape)     
+        self.field_of_view_shape.color = (183, 183, 183, 1)
         self.body.angle = heading
         
         # define image used
