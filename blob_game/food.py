@@ -7,6 +7,7 @@ class Food():
         # stats
         self.size = size * 0.5 # 0.5 scaling for food (don't want to be too big)
         self.mass = size * 0.01 # mass is relative to size
+        self.health = (size * 5) / 1.3
         
         # generating image
         self.generated_image = self.generate_food()
@@ -30,7 +31,6 @@ class Food():
         self.heading = self.body.angle
         self.image = self.rot_img[int( self.heading / self.min_angle ) % len( self.rot_img )]
         self.rect.center = self.body.position
-        self.health = 999
         self.mask = pygame.mask.from_surface(self.image)
         
     def generate_food(self):
