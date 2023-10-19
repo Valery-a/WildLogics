@@ -114,6 +114,9 @@ while not done:
 
     for blob in blob_sprites:
         blob.update()
+        
+    for food in food_sprites:
+        food.update()
 
     for blob in blob_sprites:
         blob.nearest_object(food_sprites)
