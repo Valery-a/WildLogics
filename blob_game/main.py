@@ -116,13 +116,11 @@ while not done:
         blob.update()
 
     for blob in blob_sprites:
+        blob.nearest_object(food_sprites)
         for food in food_sprites:
             if blob.blob_is_eating(food):
                 food_sprites.remove(food)
                 space.remove(food.shape, food.body)
-                
-    for blob in blob_sprites:
-        blob.nearest_object(food_sprites)
 
     for i, blob in enumerate(blob_sprites):
         if blob.energy <= 0:

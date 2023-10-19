@@ -17,6 +17,7 @@ class Food():
         self.body = pymunk.Body(self.mass, self.moment)
         self.shape = pymunk.Circle(self.body, radius)
         self.body.position = x, y
+        self.shape.friction = 0.5
         space.add(self.body, self.shape)
         
         self.rect.center = self.body.position

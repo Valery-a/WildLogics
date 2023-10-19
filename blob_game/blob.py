@@ -9,7 +9,7 @@ from pymunk.autogeometry import march_hard, simplify_curves
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 3, view_distance = 30, view_angle = 20 ):
+    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 3, view_distance = 25, view_angle = 30 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
@@ -23,6 +23,9 @@ class Blob( ):
         self.view_angle = view_angle
         self.current_nearest_object_distance = 0
         self.current_nearest_object_angle = 0
+        self.speed = 0
+        self.max_speed = 10
+        self.max_reverse_speed = -self.max_speed / 2  
         
         # setting up blob images
         self.images = {}
@@ -50,6 +53,7 @@ class Blob( ):
         self.body = pymunk.Body(self.mass, self.moment)  
         self.shape.body = self.body
         self.shape.elasticity = 0.7  # Bounciness
+        self.shape.friction = 0.5
         self.body.position = x, y     
         body_size = [
             (width / 2 , -height / 5), 
@@ -84,13 +88,6 @@ class Blob( ):
         # masks and position
         self.body_mask = pygame.mask.from_surface(self.images['full_image'])
         self.rect.center = ( x, y )
-        
-        # movement
-        self.reversing = False
-        self.speed = 0
-        self.max_speed = 10
-        self.max_reverse_speed = -self.max_speed / 2    
-        self.position = pygame.math.Vector2( self.body.position.x, self.body.position.y )
         
     def generate_blob(self):
         body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_circle.png' ), self.size).convert_alpha()
@@ -147,8 +144,7 @@ class Blob( ):
             self.speed = self.max_speed
         if self.speed < self.max_reverse_speed:
             self.speed = self.max_reverse_speed
-        if self.speed > 0:
-            self.energy -= 0.1
+        self.energy -= 0.1
         self.body.apply_force_at_local_point((self.speed, 0), (0, 0))
             
     def blob_is_eating(self, food):
@@ -175,10 +171,9 @@ class Blob( ):
         if not found_object:
             self.current_nearest_object_distance = 0
             
-        print(f'{self.current_nearest_object_distance} - {self.current_nearest_object_angle}')
-            
     def update( self ):
         """ Sprite update function, calcualtes any new position """
+        self.energy -= 0.01
         lower_acceleration_speed = self.speed - 0.05
         lower_reverse_speed = self.speed + 0.05
         if self.speed > 0:
