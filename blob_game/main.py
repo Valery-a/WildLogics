@@ -40,8 +40,10 @@ pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_SURFACE)
 pygame.display.set_caption("blob Steering")
 
-black_blob = Blob(600, 400, space)
+black_blob = Blob(300, 400, space)
+some_blob = Blob(600, 400, space)
 blob_sprites = []
+blob_sprites.append(some_blob)
 blob_sprites.append(black_blob)
 
 food = Food(350, 450, space, 5)
@@ -119,11 +121,14 @@ while not done:
         food.update()
 
     for blob in blob_sprites:
-        blob.nearest_object(food_sprites)
+        #blob.nearest_object(food_sprites)
         for food in food_sprites:
             if blob.blob_is_eating(food):
                 food_sprites.remove(food)
                 space.remove(food.shape, food.body)
+                
+    black_blob.nearest_object(food_sprites + blob_sprites)
+    print(f"{black_blob.current_nearest_object_distance} - {black_blob.current_nearest_object_angle} - {black_blob.current_nearest_object_type}")
 
     for i, blob in enumerate(blob_sprites):
         if blob.energy <= 0:

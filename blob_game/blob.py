@@ -23,9 +23,11 @@ class Blob( ):
         self.view_angle = view_angle
         self.current_nearest_object_distance = 0
         self.current_nearest_object_angle = 0
+        self.current_nearest_object_type = "none"
         self.speed = 0
         self.max_speed = 10
-        self.max_reverse_speed = -self.max_speed / 2  
+        self.max_reverse_speed = -self.max_speed / 2
+        self.type = "blob"  
         
         # setting up blob images
         self.images = {}
@@ -159,17 +161,31 @@ class Blob( ):
     def nearest_object(self, objects):
         found_object = False
         for object in objects:
+            if object == self:
+                continue
             distance_to_object = self.field_of_view_shape.point_query(object.body.position)
-            if distance_to_object.distance <= self.current_nearest_object_distance:
+            if round(distance_to_object.distance, 2) < 0:
                 found_object = True
                 a = object.body.position.y - self.body.position.y
                 b = object.body.position.x - self.body.position.x
                 angle_to_object = math.atan2(a, b) - math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
-                self.current_nearest_object_distance = distance_to_object.distance
-                self.current_nearest_object_angle = angle_to_object
+                self.current_nearest_object_distance = round(distance_to_object.distance, 2)
+                self.current_nearest_object_angle = round(abs(angle_to_object), 2)
+                self.current_nearest_object_type = object.type
+                if round(distance_to_object.distance, 2) <= self.current_nearest_object_distance:
+                    a = object.body.position.y - self.body.position.y
+                    b = object.body.position.x - self.body.position.x
+                    angle_to_object = math.atan2(a, b) - math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
+                    self.current_nearest_object_distance = round(distance_to_object.distance, 2)
+                    self.current_nearest_object_angle = round(abs(angle_to_object), 2)
+                    self.current_nearest_object_type = object.type
         
         if not found_object:
             self.current_nearest_object_distance = 0
+            self.current_nearest_object_angle = 0
+            self.current_nearest_object_type = "none"
+            
+        #print(f"{self.current_nearest_object_distance} - {self.current_nearest_object_angle} - {self.current_nearest_object_type}")
             
     def update( self ):
         """ Sprite update function, calcualtes any new position """
