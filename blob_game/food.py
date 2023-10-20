@@ -53,3 +53,8 @@ class Food():
     def draw(self, win):
         pos = (self.body.position.x - self.rect.width / 2, self.body.position.y - self.rect.height / 2)
         win.blit(self.image, pos)
+
+    def is_clicked(self, pos):
+        # Check if the point (pos) is within the bounding box of the food item
+        return (self.body.position.x - self.rect.width / 2) <= pos[0] <= (self.body.position.x + self.rect.width / 2) and \
+               (self.body.position.y - self.rect.height / 2) <= pos[1] <= (self.body.position.y + self.rect.height / 2)

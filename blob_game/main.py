@@ -19,24 +19,28 @@ DISPLAY_HEIGHT = WINDOW_HEIGHT + 2 * BORDER_WIDTH
 pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-pygame.display.set_caption("blob Steering")
+pygame.display.set_caption("Blob Steering")
 
 space = pymunk.Space()
 space.gravity = (0, 0)
 space.damping = 0.001
 draw_options = DrawOptions(window)
-
+gui_panel_visible = False
 background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("blob Steering")
+pygame.display.set_caption("Blob Steering")
 font = pygame.font.Font(None, 36)
 
 MINIMAP_WIDTH = 200
 MINIMAP_HEIGHT = 150
 minimap_surface = pygame.Surface((MINIMAP_WIDTH, MINIMAP_HEIGHT))
+
+GUI_PANEL_WIDTH = 200
+GUI_PANEL_COLOR = (50, 50, 50)
+gui_panel_surface = pygame.Surface((GUI_PANEL_WIDTH, DISPLAY_HEIGHT))
 
 def generate_random_food():
     x = random.randint(0, WINDOW_WIDTH)
@@ -58,7 +62,7 @@ def draw_minimap(blob_objects, food_objects):
                             int(food.body.position.y * MINIMAP_HEIGHT / WINDOW_HEIGHT)), 2)
     
     pygame.draw.rect(minimap_surface, (255, 255, 255), (0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT), 2)
-    
+
 def draw_game(blob_objects, food_objects):
     background_surface.fill(GREY_COLOR)
     window.blit(background_surface, (0, 0))
@@ -72,7 +76,37 @@ def draw_game(blob_objects, food_objects):
     draw_minimap(blob_objects, food_objects)
     minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10
     window.blit(minimap_surface, (minimap_x, 10))
+
+def toggle_gui_panel():
+    global gui_panel_visible
+    gui_panel_visible = not gui_panel_visible
     
+def draw_gui_panel(selected_object):
+    if gui_panel_visible:
+        gui_panel_surface.fill(GUI_PANEL_COLOR)
+
+        font = pygame.font.Font(None, 24)
+        text_color = (255, 255, 255)
+
+        if selected_object is not None:
+            text_y = 20
+            text_spacing = 30
+
+            object_type_text = font.render("Type: " + selected_object.type, True, text_color)
+            gui_panel_surface.blit(object_type_text, (10, text_y))
+            text_y += text_spacing
+
+            if selected_object.type == "blob":
+                energy_text = font.render("Energy: " + str(selected_object.energy), True, text_color)
+                gui_panel_surface.blit(energy_text, (10, text_y))
+                text_y += text_spacing
+            elif selected_object.type == "food":
+                health_text = font.render("Health: " + str(selected_object.health), True, text_color)
+                gui_panel_surface.blit(health_text, (10, text_y))
+                text_y += text_spacing
+
+        window.blit(gui_panel_surface, (0, 0))
+
 def main(config, genomes):
     amount_of_food_to_spawn = 100
     food_objects = []
@@ -88,6 +122,8 @@ def main(config, genomes):
     clock = pygame.time.Clock()
     done = False
     food_spawn_time = time.time()
+    selected_object = None  # Add this variable
+    
     while not done:
         current_time = time.time()
         if current_time - food_spawn_time >= 10:
@@ -98,6 +134,16 @@ def main(config, genomes):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                toggle_gui_panel()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
+                for blob in blob_objects:
+                    if blob.is_clicked(event.pos):
+                        selected_object = blob
+                for food in food_objects:
+                    if food.is_clicked(event.pos):
+                        selected_object = food
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -111,11 +157,10 @@ def main(config, genomes):
 
         for blob in blob_objects:
             blob.update()
-            
+
         for food in food_objects:
             food.update()
 
-        print(player_blob.energy)
         for blob in blob_objects:
             blob.nearest_object(food_objects)
             for food in food_objects:
@@ -130,11 +175,14 @@ def main(config, genomes):
 
         draw_game(blob_objects, food_objects)
 
-        # Step the Pymunk space
-        space.step(1 / 60.0)  # 60 FPS
+        draw_gui_panel(selected_object)
+
+        space.step(1 / 60.0)
         pygame.display.flip()
+        minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10
+        window.blit(minimap_surface, (minimap_x, 10))
         clock.tick(60)
 
     pygame.quit()
-    
-main(0,0)
+
+main(0, 0)

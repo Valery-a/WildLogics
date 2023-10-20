@@ -90,7 +90,12 @@ class Blob( ):
         # masks and position
         self.body_mask = pygame.mask.from_surface(self.images['full_image'])
         self.rect.center = ( x, y )
-        
+    
+    def is_clicked(self, pos):
+        # Check if the point (pos) is within the bounding box of the blob
+        return (self.body.position.x - self.rect.width / 2) <= pos[0] <= (self.body.position.x + self.rect.width / 2) and \
+               (self.body.position.y - self.rect.height / 2) <= pos[1] <= (self.body.position.y + self.rect.height / 2)
+    
     def generate_blob(self):
         body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_circle.png' ), self.size).convert_alpha()
         #mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), self.size).convert_alpha()
