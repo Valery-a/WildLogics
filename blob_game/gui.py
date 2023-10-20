@@ -31,11 +31,15 @@ def draw_gui_panel(selected_object, win):
             if selected_object.type == "blob":
                 energy_text = font.render("Energy: " + str(selected_object.energy), True, text_color)
                 gui_panel_surface.blit(energy_text, (panel_padding, text_y))
-                text_y += text_spacing
+                # Draw a progress bar for energy
+                pygame.draw.rect(gui_panel_surface, (0, 255, 0), (panel_padding, text_y + text_spacing, selected_object.energy, 10))
+                text_y += text_spacing * 2
             elif selected_object.type == "food":
                 health_text = font.render("Health: " + str(selected_object.health), True, text_color)
                 gui_panel_surface.blit(health_text, (panel_padding, text_y))
-                text_y += text_spacing
+                # Draw a progress bar for health
+                pygame.draw.rect(gui_panel_surface, (255, 0, 0), (panel_padding, text_y + text_spacing, selected_object.health, 10))
+                text_y += text_spacing * 2
             
             camera_width = 100
             camera_height = 75
