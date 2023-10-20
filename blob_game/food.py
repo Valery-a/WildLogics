@@ -50,9 +50,13 @@ class Food():
                 
         self.rect = self.image.get_rect()
     
-    def draw(self, win):
-        pos = (self.body.position.x - self.rect.width / 2, self.body.position.y - self.rect.height / 2)
-        win.blit(self.image, pos)
+    def draw(self, win, zoom_factor=1):
+        img_width, img_height = self.image.get_rect().size
+        x = int(self.body.position.x * zoom_factor) - img_width / 2
+        y = int(self.body.position.y * zoom_factor) - img_height / 2
+        zoomed_image = pygame.transform.scale(self.image, (int(img_width * zoom_factor), int(img_height * zoom_factor)))
+        win.blit(zoomed_image, (x, y))
+
 
     def is_clicked(self, pos):
         # Check if the point (pos) is within the bounding box of the food item

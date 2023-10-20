@@ -2,11 +2,10 @@ import pygame
 import math
 import random
 import time
-from pygame.locals import *
-from blob import Blob
-from food import Food
 import pymunk
 from pymunk.pygame_util import DrawOptions
+from food import Food
+from blob import Blob
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 750
@@ -42,6 +41,8 @@ GUI_PANEL_WIDTH = 200
 GUI_PANEL_COLOR = (50, 50, 50)
 gui_panel_surface = pygame.Surface((GUI_PANEL_WIDTH, DISPLAY_HEIGHT))
 
+zoom_factor = 1  # Adjust this value as needed for zooming in the camera view
+
 def generate_random_food():
     x = random.randint(0, WINDOW_WIDTH)
     y = random.randint(0, WINDOW_HEIGHT)
@@ -68,10 +69,10 @@ def draw_game(blob_objects, food_objects):
     window.blit(background_surface, (0, 0))
     space.debug_draw(draw_options)
     for blob in blob_objects:
-        blob.draw(window)
+        blob.draw(window, zoom_factor=zoom_factor)
         
     for food in food_objects:
-        food.draw(window)
+        food.draw(window, zoom_factor=zoom_factor)
 
     draw_minimap(blob_objects, food_objects)
     minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10
@@ -81,31 +82,67 @@ def toggle_gui_panel():
     global gui_panel_visible
     gui_panel_visible = not gui_panel_visible
     
-def draw_gui_panel(selected_object):
+def draw_gui_panel(selected_object, win):
     if gui_panel_visible:
         gui_panel_surface.fill(GUI_PANEL_COLOR)
 
-        font = pygame.font.Font(None, 24)
+        # Define styles
+        panel_padding = 10
         text_color = (255, 255, 255)
+        header_color = (30, 144, 255)
+        font = pygame.font.Font(None, 24)
 
         if selected_object is not None:
-            text_y = 20
+            text_y = panel_padding
             text_spacing = 30
 
-            object_type_text = font.render("Type: " + selected_object.type, True, text_color)
-            gui_panel_surface.blit(object_type_text, (10, text_y))
+            # Header
+            header_text = font.render("Object Details", True, header_color)
+            gui_panel_surface.blit(header_text, (panel_padding, text_y))
             text_y += text_spacing
 
+            # Object type
+            object_type_text = font.render("Type: " + selected_object.type, True, text_color)
+            gui_panel_surface.blit(object_type_text, (panel_padding, text_y))
+            text_y += text_spacing
+
+            # Display specific attributes based on the object type
             if selected_object.type == "blob":
                 energy_text = font.render("Energy: " + str(selected_object.energy), True, text_color)
-                gui_panel_surface.blit(energy_text, (10, text_y))
+                gui_panel_surface.blit(energy_text, (panel_padding, text_y))
                 text_y += text_spacing
             elif selected_object.type == "food":
                 health_text = font.render("Health: " + str(selected_object.health), True, text_color)
-                gui_panel_surface.blit(health_text, (10, text_y))
+                gui_panel_surface.blit(health_text, (panel_padding, text_y))
                 text_y += text_spacing
+            
+            # Create a camera view in the panel
+            camera_width = 100
+            camera_height = 75
+            camera_x = panel_padding
+            camera_y = text_y + text_spacing
+            camera_rect = pygame.Rect(camera_x, camera_y, camera_width, camera_height)
 
-        window.blit(gui_panel_surface, (0, 0))
+            # Calculate the camera view position based on the selected object's position
+            if selected_object:
+                camera_center_x = int(selected_object.body.position.x * zoom_factor)
+                camera_center_y = int(selected_object.body.position.y * zoom_factor)
+            else:
+                # If no object is selected, center the camera on a fixed point or a default position
+                camera_center_x = camera_x + camera_width // 2
+                camera_center_y = camera_y + camera_height // 2
+
+            camera_view = pygame.Surface((camera_width, camera_height))
+            camera_view_rect = pygame.Rect(0, 0, camera_width, camera_height)
+
+            # Copy the region around the selected object to the camera view
+            camera_view.blit(win, camera_view_rect, camera_view_rect.move(camera_center_x - camera_width // 2, camera_center_y - camera_height // 2))
+
+            # Display the camera view in the GUI panel
+            pygame.draw.rect(gui_panel_surface, (255, 255, 255), camera_rect, 2)
+            gui_panel_surface.blit(camera_view, (camera_x + 2, camera_y + 2))
+
+        win.blit(gui_panel_surface, (0, 0))
 
 def main(config, genomes):
     amount_of_food_to_spawn = 100
@@ -175,7 +212,7 @@ def main(config, genomes):
 
         draw_game(blob_objects, food_objects)
 
-        draw_gui_panel(selected_object)
+        draw_gui_panel(selected_object, window)
 
         space.step(1 / 60.0)
         pygame.display.flip()

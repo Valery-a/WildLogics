@@ -204,6 +204,10 @@ class Blob( ):
             
         self.turn(0)
         
-    def draw(self, win):
+    def draw(self, win, zoom_factor=1):
         for name, image in self.images.items():
-            win.blit(image, (self.body.position.x - self.images['full_image'].get_rect().width / 2, self.body.position.y - self.images['full_image'].get_rect().height / 2))
+            img_width, img_height = image.get_rect().size
+            x = int(self.body.position.x * zoom_factor) - img_width / 2
+            y = int(self.body.position.y * zoom_factor) - img_height / 2
+            zoomed_image = pygame.transform.scale(image, (int(img_width * zoom_factor), int(img_height * zoom_factor)))
+            win.blit(zoomed_image, (x, y))
