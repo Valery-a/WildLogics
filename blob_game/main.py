@@ -38,18 +38,20 @@ def main(config, genomes):
     amount_of_food_to_spawn = 100
     food_objects = []
     for i in range(amount_of_food_to_spawn):
-        random_coords = [random.randint(0, WINDOW_WIDTH), random.randint(0, WINDOW_HEIGHT)]
+        random_coords = [random.randint(0, WINDOW_WIDTH * 2), random.randint(0, WINDOW_HEIGHT * 2)]
         random_size = (random.uniform(1, 2))
         food_objects.append(Food(random_coords[0], random_coords[1], space, random_size))
     
     blob_objects = []
-    player_blob = Blob(random.randint(0, WINDOW_WIDTH), random.randint(0, WINDOW_HEIGHT), space)
+    player_blob = Blob(0, 0, space)
     blob_objects.append(player_blob)    
         
     clock = pygame.time.Clock()
     done = False
     food_spawn_time = time.time()
     selected_object = None  # Add this variable
+    
+    scaling = 1
     
     while not done:
         current_time = time.time()
@@ -99,15 +101,25 @@ def main(config, genomes):
             if blob.energy <= 0:
                 blob_objects.pop(i)
                 space.remove(blob.body, blob.shape, blob.mouth_shape, blob.field_of_view_shape)
+        
+        zoom_in = int(keys[pygame.K_a])
+        zoom_out = int(keys[pygame.K_z])
+        zoom_speed = 0.1
+        scaling *= 1 + (zoom_speed * zoom_in - zoom_speed * zoom_out)
+        draw_options.transform = (
+            pymunk.Transform.translation(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+            @ pymunk.Transform.scaling(scaling)
+            @ pymunk.Transform.translation(-WINDOW_WIDTH // 2, -WINDOW_HEIGHT // 2)
+        )
 
-        draw_game(blob_objects, food_objects)
+        draw_game(blob_objects, food_objects, space, draw_options, scaling)
 
         draw_gui_panel(selected_object, window)
 
-        space.step(1 / 60.0)
-        pygame.display.flip()
         minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10
         window.blit(minimap_surface, (minimap_x, 10))
+        pygame.display.flip()
+        space.step(1 / 60.0)
         clock.tick(60)
 
     pygame.quit()

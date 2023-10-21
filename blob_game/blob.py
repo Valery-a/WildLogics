@@ -206,8 +206,9 @@ class Blob( ):
         
     def draw(self, win, zoom_factor=1):
         for name, image in self.images.items():
-            img_width, img_height = image.get_rect().size
-            x = int(self.body.position.x * zoom_factor) - img_width / 2
-            y = int(self.body.position.y * zoom_factor) - img_height / 2
-            zoomed_image = pygame.transform.scale(image, (int(img_width * zoom_factor), int(img_height * zoom_factor)))
-            win.blit(zoomed_image, (x, y))
+            current_image = pygame.transform.scale_by(image, zoom_factor)
+            img_width, img_height = current_image.get_rect().size
+            pos = pymunk.Transform.translation(1200 / 2, 750 / 2) @ pymunk.Transform.scaling(zoom_factor) @ pymunk.Transform.translation(-1200 / 2, -750 / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
+            x = pos.x - img_width / 2
+            y = pos.y - img_height / 2
+            win.blit(current_image, (x, y))

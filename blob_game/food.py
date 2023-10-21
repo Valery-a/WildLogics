@@ -51,11 +51,11 @@ class Food():
         self.rect = self.image.get_rect()
     
     def draw(self, win, zoom_factor=1):
-        img_width, img_height = self.image.get_rect().size
-        x = int(self.body.position.x * zoom_factor) - img_width / 2
-        y = int(self.body.position.y * zoom_factor) - img_height / 2
-        zoomed_image = pygame.transform.scale(self.image, (int(img_width * zoom_factor), int(img_height * zoom_factor)))
-        win.blit(zoomed_image, (x, y))
+        image = pygame.transform.scale_by(self.image, zoom_factor)
+        pos = pymunk.Transform.translation(1200 / 2, 750 / 2) @ pymunk.Transform.scaling(zoom_factor) @ pymunk.Transform.translation(-1200 / 2, -750 / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
+        x = pos.x - image.get_rect().width / 2
+        y = pos.y - image.get_rect().height / 2
+        win.blit(image, (x, y))
 
 
     def is_clicked(self, pos):

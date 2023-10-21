@@ -15,10 +15,6 @@ DISPLAY_HEIGHT = WINDOW_HEIGHT + 2 * BORDER_WIDTH
 ZOOM_FACTOR = 1
 
 window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-space = pymunk.Space()
-space.gravity = (0, 0)
-space.damping = 0.001
-draw_options = DrawOptions(window)
 gui_panel_visible = False
 background_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
