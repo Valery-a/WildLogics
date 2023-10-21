@@ -122,7 +122,7 @@ def main(config, genomes):
             food.update()
 
         for blob in blob_objects:
-            blob.nearest_object(food_objects)
+            blob.nearest_object(food_objects + blob_objects)
             for food in food_objects:
                 if blob.blob_is_eating(food):
                     food_objects.remove(food)
