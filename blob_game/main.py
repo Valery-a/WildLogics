@@ -43,7 +43,9 @@ def main(config, genomes):
         food_objects.append(Food(random_coords[0], random_coords[1], space, random_size))
     
     blob_objects = []
-    player_blob = Blob(random.randint(-WINDOW_WIDTH, WINDOW_WIDTH * 2), random.randint(-WINDOW_HEIGHT, WINDOW_HEIGHT * 2), space)
+    player_blob = Blob(400, 500, space)
+    some_blob = Blob(500, 500, space)
+    blob_objects.append(some_blob)
     blob_objects.append(player_blob)    
         
     clock = pygame.time.Clock()
@@ -125,6 +127,12 @@ def main(config, genomes):
                 if blob.blob_is_eating(food):
                     food_objects.remove(food)
                     space.remove(food.shape, food.body)
+        
+        for blob in blob_objects:
+            for other_blob in blob_objects:
+                if blob.blob_is_eating(other_blob):
+                    blob_objects.remove(other_blob)
+                    space.remove(other_blob.body, other_blob.shape, other_blob.mouth_shape, other_blob.field_of_view_shape)
 
         for i, blob in enumerate(blob_objects):
             if blob.energy <= 0:

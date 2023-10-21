@@ -1,5 +1,7 @@
 import pygame
 import math
+
+from sympy import true
 from configValues import *
 import pymunk
 from pymunk.autogeometry import march_hard, simplify_curves
@@ -15,7 +17,9 @@ class Blob( ):
         
         # stats
         self.energy = 100
+        self.health = 40
         self.attack_power = attack_power
+        self.attack_power_to_blobs = attack_power / 2
         self.size = size
         self.view_distance = view_distance * size
         self.view_angle = view_angle
@@ -152,12 +156,20 @@ class Blob( ):
         self.energy -= 0.05
         self.body.apply_force_at_local_point((self.speed, 0), (0, 0))
             
-    def blob_is_eating(self, food):
-        if self.mouth_shape.shapes_collide(food.shape).normal != pymunk.Vec2d(-0,-0):
-            self.energy += self.attack_power / 2
-            food.health -= self.attack_power
-            if food.health < 0:
-                return True
+    def blob_is_eating(self, object):
+        if object == self:
+            return False
+        
+        if self.mouth_shape.shapes_collide(object.shape).normal != pymunk.Vec2d(-0,-0):
+            if object.type == 'food':
+                self.energy += self.attack_power / 2
+                object.health -= self.attack_power
+            elif object.type == 'blob':
+                self.energy += self.attack_power / 10
+                object.health -= self.attack_power_to_blobs
+                
+            if object.health < 0:
+                    return True
             
         return False
     
