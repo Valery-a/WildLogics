@@ -39,7 +39,7 @@ def main(config, genomes):
     food_objects = []
     for i in range(amount_of_food_to_spawn):
         random_coords = [random.randint(-WINDOW_WIDTH, WINDOW_WIDTH * 2), random.randint(-WINDOW_HEIGHT, WINDOW_HEIGHT * 2)]
-        random_size = (random.uniform(1, 2))
+        random_size = (random.uniform(4, 6))
         food_objects.append(Food(random_coords[0], random_coords[1], space, random_size))
     
     blob_objects = []
