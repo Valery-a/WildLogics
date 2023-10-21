@@ -1,8 +1,6 @@
-from turtle import position
-from networkx import center
 import pygame
 import math
-import sys
+from configValues import *
 import pymunk
 from pymunk.autogeometry import march_hard, simplify_curves
 
@@ -204,11 +202,11 @@ class Blob( ):
             
         self.turn(0)
         
-    def draw(self, win, zoom_factor=1):
+    def draw(self, win, translation, zoom_factor=1):
         for name, image in self.images.items():
             current_image = pygame.transform.scale_by(image, zoom_factor)
             img_width, img_height = current_image.get_rect().size
-            pos = pymunk.Transform.translation(1200 / 2, 750 / 2) @ pymunk.Transform.scaling(zoom_factor) @ pymunk.Transform.translation(-1200 / 2, -750 / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
+            pos = pymunk.Transform.translation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2) @ pymunk.Transform.scaling(zoom_factor) @ translation @ pymunk.Transform.translation(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
             x = pos.x - img_width / 2
             y = pos.y - img_height / 2
             win.blit(current_image, (x, y))

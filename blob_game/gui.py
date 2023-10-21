@@ -79,14 +79,14 @@ def draw_minimap(blob_objects, food_objects):
     
     pygame.draw.rect(minimap_surface, (255, 255, 255), (0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT), 2)
     
-def draw_game(blob_objects, food_objects, space, draw_options, scaling):
+def draw_game(blob_objects, food_objects, space, draw_options, scaling, translation):
     window.fill(GREY_COLOR)
-    space.debug_draw(draw_options)
+    #space.debug_draw(draw_options)
     for blob in blob_objects:
-        blob.draw(window, zoom_factor=scaling)
+        blob.draw(window, zoom_factor=scaling, translation = translation)
         
     for food in food_objects:
-        food.draw(window, zoom_factor=scaling)
+        food.draw(window, zoom_factor=scaling, translation = translation)
 
     draw_minimap(blob_objects, food_objects)
     minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10

@@ -1,7 +1,7 @@
 import pygame
 import pymunk
 import math
-
+from configValues import *
 class Food():
     def __init__( self, x, y, space, size = 1):
         # stats
@@ -50,9 +50,9 @@ class Food():
                 
         self.rect = self.image.get_rect()
     
-    def draw(self, win, zoom_factor=1):
+    def draw(self, win, translation, zoom_factor=1):
         image = pygame.transform.scale_by(self.image, zoom_factor)
-        pos = pymunk.Transform.translation(1200 / 2, 750 / 2) @ pymunk.Transform.scaling(zoom_factor) @ pymunk.Transform.translation(-1200 / 2, -750 / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
+        pos = pymunk.Transform.translation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2) @ pymunk.Transform.scaling(zoom_factor) @ translation @ pymunk.Transform.translation(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
         x = pos.x - image.get_rect().width / 2
         y = pos.y - image.get_rect().height / 2
         win.blit(image, (x, y))
