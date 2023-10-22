@@ -200,7 +200,7 @@ class Blob( ):
             self.current_nearest_object_angle = 0
             self.current_nearest_object_type = "none"
             
-        print(f"{self.current_nearest_object_distance} - {self.current_nearest_object_angle} - {self.current_nearest_object_type}")
+        #print(f"{self.current_nearest_object_distance} - {self.current_nearest_object_angle} - {self.current_nearest_object_type}")
             
     def update( self ):
         """ Sprite update function, calcualtes any new position """

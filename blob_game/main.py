@@ -1,3 +1,4 @@
+from re import X
 import pygame
 import math
 import random
@@ -60,6 +61,7 @@ def main(config, genomes):
         current_time = time.time()
         zoom_in = 0
         zoom_out = 0
+        vector_of_translation = [0,0]
         if current_time - food_spawn_time >= 10:
             food_sprite = generate_random_food()
             food_objects.append(food_sprite)
@@ -80,6 +82,8 @@ def main(config, genomes):
                         selected_object = food
             
             if event.type == pygame.MOUSEWHEEL:
+                x, y = pygame.mouse.get_pos()
+                vector_of_translation = [x - WINDOW_WIDTH / 2, y - WINDOW_HEIGHT / 2]
                 if event.y == -1:
                     zoom_out = 1
                 elif event.y == 1:
@@ -91,9 +95,10 @@ def main(config, genomes):
         down = int(keys[pygame.K_s])
         right = int(keys[pygame.K_d])
         translate_speed = 10
+        zoom_translate_speed = 0.1
         translation = translation.translated(
-            translate_speed * left - translate_speed * right,
-            translate_speed * up - translate_speed * down,
+            translate_speed * left - (translate_speed * right + vector_of_translation[0] * zoom_translate_speed),
+            translate_speed * up - (translate_speed * down + + vector_of_translation[1] * zoom_translate_speed),
         )
                 
         zoom_speed = 0.1

@@ -58,8 +58,6 @@ def draw_gui_panel(selected_object, win):
             camera_view_rect = pygame.Rect(0, 0, camera_width, camera_height)
 
             camera_view.blit(win, camera_view_rect, camera_view_rect.move(camera_center_x - camera_width // 2, camera_center_y - camera_height // 2))
-
-            pygame.draw.rect(gui_panel_surface, (255, 255, 255), camera_rect, 2)
             gui_panel_surface.blit(camera_view, (camera_x + 2, camera_y + 2))
 
         win.blit(gui_panel_surface, (0, 0))
