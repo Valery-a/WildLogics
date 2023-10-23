@@ -102,10 +102,10 @@ def main(config, genomes):
         down = int(keys[pygame.K_s])
         right = int(keys[pygame.K_d])
         
-        if selected_object != None:
-            if zoomed_in_on_selected_object:
-                vector_of_translation = [selected_object.rect.center[0] - WINDOW_WIDTH / 2, selected_object.rect.center[1] - WINDOW_HEIGHT / 2]
-                scaling = 3
+        # if selected_object != None:
+        #     if zoomed_in_on_selected_object:
+        #         vector_of_translation = [selected_object.rect.center[0] - WINDOW_WIDTH / 2, selected_object.rect.center[1] - WINDOW_HEIGHT / 2]
+        #         scaling = 3
             
         translate_speed = 10
         zoom_speed = 0.1
