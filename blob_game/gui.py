@@ -6,11 +6,13 @@ from configValues import *
 def toggle_gui_panel():
     global gui_panel_visible
     gui_panel_visible = not gui_panel_visible
-    
+    import pygame
+
 def draw_gui_panel(selected_object, win):
     if gui_panel_visible:
+        # Stylish panel background
         gui_panel_surface.fill(GUI_PANEL_COLOR)
-
+        
         panel_padding = 10
         text_color = (255, 255, 255)
         header_color = (30, 144, 255)
@@ -20,6 +22,7 @@ def draw_gui_panel(selected_object, win):
             text_y = panel_padding
             text_spacing = 30
 
+            # Header styling
             header_text = font.render("Object Details", True, header_color)
             gui_panel_surface.blit(header_text, (panel_padding, text_y))
             text_y += text_spacing
@@ -31,21 +34,27 @@ def draw_gui_panel(selected_object, win):
             if selected_object.type == "blob":
                 energy_text = font.render("Energy: " + str(selected_object.energy), True, text_color)
                 gui_panel_surface.blit(energy_text, (panel_padding, text_y))
-                # Draw a progress bar for energy
-                pygame.draw.rect(gui_panel_surface, (0, 255, 0), (panel_padding, text_y + text_spacing, selected_object.energy, 10))
+                text_y += text_spacing
+
+                # Stylish energy bar
+                energy_bar_rect = pygame.Rect(panel_padding, text_y, selected_object.energy, 10)
+                pygame.draw.rect(gui_panel_surface, (0, 255, 0), energy_bar_rect, 0)
+                pygame.draw.rect(gui_panel_surface, (255, 255, 255), energy_bar_rect, 1)
                 text_y += text_spacing * 2
             elif selected_object.type == "food":
                 health_text = font.render("Health: " + str(selected_object.health), True, text_color)
                 gui_panel_surface.blit(health_text, (panel_padding, text_y))
-                # Draw a progress bar for health
-                pygame.draw.rect(gui_panel_surface, (255, 0, 0), (panel_padding, text_y + text_spacing, selected_object.health, 10))
+                text_y += text_spacing
+
+                # Stylish health bar
+                health_bar_rect = pygame.Rect(panel_padding, text_y, selected_object.health, 10)
+                pygame.draw.rect(gui_panel_surface, (255, 0, 0), health_bar_rect, 0)
                 text_y += text_spacing * 2
-            
-            camera_width = 100
-            camera_height = 75
+
+            camera_width = 180
+            camera_height = 100
             camera_x = panel_padding
             camera_y = text_y + text_spacing
-            camera_rect = pygame.Rect(camera_x, camera_y, camera_width, camera_height)
 
             if selected_object:
                 camera_center_x = int(selected_object.rect.center[0])
@@ -58,7 +67,12 @@ def draw_gui_panel(selected_object, win):
             camera_view_rect = pygame.Rect(0, 0, camera_width, camera_height)
 
             camera_view.blit(win, camera_view_rect, camera_view_rect.move(camera_center_x - camera_width // 2, camera_center_y - camera_height // 2))
-            gui_panel_surface.blit(camera_view, (camera_x + 2, camera_y + 2))
+
+            # Stylish camera view
+            gui_panel_surface.blit(camera_view, (camera_x, camera_y))
+            
+            camera_rect = pygame.Rect(camera_x, camera_y, camera_width, camera_height)
+            pygame.draw.rect(gui_panel_surface, (255, 255, 255), camera_rect, 1)
 
         win.blit(gui_panel_surface, (0, 0))
 
