@@ -49,10 +49,15 @@ class Food():
         pos = pymunk.Transform.translation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2) @ pymunk.Transform.scaling(zoom_factor) @ translation @ pymunk.Transform.translation(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
         x = pos.x - image.get_rect().width / 2
         y = pos.y - image.get_rect().height / 2
+        self.rect.x = x
+        self.rect.y = y
+        self.rect.center = (pos)
+        self.rect.width = image.get_rect().width
+        self.rect.height = image.get_rect().height
         win.blit(image, (x, y))
 
 
     def is_clicked(self, pos):
-        # Check if the point (pos) is within the bounding box of the food item
-        return (self.body.position.x - self.rect.width / 2) <= pos[0] <= (self.body.position.x + self.rect.width / 2) and \
-               (self.body.position.y - self.rect.height / 2) <= pos[1] <= (self.body.position.y + self.rect.height / 2)
+        # Check if the point (pos) is within the bounding box of the blob
+        return (self.rect.center[0] - self.rect.width * 0.35) <= pos[0] <= (self.rect.center[0] + self.rect.width * 0.35) and \
+               (self.rect.center[1] - self.rect.height * 0.35) <= pos[1] <= (self.rect.center[1] + self.rect.height * 0.35)

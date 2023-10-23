@@ -5,6 +5,7 @@ import random
 import time
 import pymunk
 from pymunk.pygame_util import DrawOptions
+from pymunk import pygame_util
 from food import Food
 from blob import Blob
 from configValues import *
@@ -56,6 +57,7 @@ def main(config, genomes):
     
     scaling = 1
     translation = pymunk.Transform()
+    zoomed_in_on_selected_object = False
     
     while not done:
         current_time = time.time()
@@ -74,35 +76,46 @@ def main(config, genomes):
                 toggle_gui_panel()
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
+                pos = pygame_util.get_mouse_pos(window)
                 for blob in blob_objects:
-                    if blob.is_clicked(event.pos):
+                    if blob.is_clicked(pos):
                         selected_object = blob
+                        zoomed_in_on_selected_object = True
                 for food in food_objects:
-                    if food.is_clicked(event.pos):
+                    if food.is_clicked(pos):
                         selected_object = food
+                        zoomed_in_on_selected_object = True  
             
             if event.type == pygame.MOUSEWHEEL:
                 x, y = pygame.mouse.get_pos()
                 vector_of_translation = [x - WINDOW_WIDTH / 2, y - WINDOW_HEIGHT / 2]
                 if event.y == -1:
                     zoom_out = 1
+                    zoomed_in_on_selected_object = False
                 elif event.y == 1:
                     zoom_in = 1
+                    zoomed_in_on_selected_object = False
         
         keys = pygame.key.get_pressed()   
         left = int(keys[pygame.K_a])
         up = int(keys[pygame.K_w])
         down = int(keys[pygame.K_s])
         right = int(keys[pygame.K_d])
+        
+        if selected_object != None:
+            if zoomed_in_on_selected_object:
+                vector_of_translation = [selected_object.rect.center[0] - WINDOW_WIDTH / 2, selected_object.rect.center[1] - WINDOW_HEIGHT / 2]
+                scaling = 3
+            
         translate_speed = 10
-        zoom_translate_speed = 0.1
-        translation = translation.translated(
-            translate_speed * left - (translate_speed * right + vector_of_translation[0] * zoom_translate_speed),
-            translate_speed * up - (translate_speed * down + + vector_of_translation[1] * zoom_translate_speed),
-        )
-                
         zoom_speed = 0.1
         scaling *= 1 + (zoom_speed * zoom_in - zoom_speed * zoom_out)
+        zoom_translate_speed = 0.1
+        
+        translation = translation.translated(
+            translate_speed * left - (translate_speed * right + vector_of_translation[0] * zoom_translate_speed),
+            translate_speed * up - (translate_speed * down + vector_of_translation[1] * zoom_translate_speed),
+        )
         draw_options.transform = (
             pymunk.Transform.translation(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
             @ pymunk.Transform.scaling(scaling)

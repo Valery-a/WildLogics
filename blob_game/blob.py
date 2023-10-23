@@ -95,8 +95,8 @@ class Blob( ):
     
     def is_clicked(self, pos):
         # Check if the point (pos) is within the bounding box of the blob
-        return (self.body.position.x - self.rect.width / 2) <= pos[0] <= (self.body.position.x + self.rect.width / 2) and \
-               (self.body.position.y - self.rect.height / 2) <= pos[1] <= (self.body.position.y + self.rect.height / 2)
+        return (self.rect.center[0] - self.rect.width * 0.35) <= pos[0] <= (self.rect.center[0] + self.rect.width * 0.35) and \
+               (self.rect.center[1] - self.rect.height * 0.35) <= pos[1] <= (self.rect.center[1] + self.rect.height * 0.35)
     
     def generate_blob(self):
         body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_circle.png' ), self.size).convert_alpha()
@@ -221,4 +221,9 @@ class Blob( ):
             pos = pymunk.Transform.translation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2) @ pymunk.Transform.scaling(zoom_factor) @ translation @ pymunk.Transform.translation(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
             x = pos.x - img_width / 2
             y = pos.y - img_height / 2
+            self.rect.x = x
+            self.rect.y = y
+            self.rect.center = (pos)
+            self.rect.width = current_image.get_rect().width
+            self.rect.height = current_image.get_rect().height
             win.blit(current_image, (x, y))
