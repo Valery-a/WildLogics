@@ -48,8 +48,8 @@ def draw_gui_panel(selected_object, win):
             camera_rect = pygame.Rect(camera_x, camera_y, camera_width, camera_height)
 
             if selected_object:
-                camera_center_x = int(selected_object.body.position.x * ZOOM_FACTOR)
-                camera_center_y = int(selected_object.body.position.y * ZOOM_FACTOR)
+                camera_center_x = int(selected_object.rect.center[0])
+                camera_center_y = int(selected_object.rect.center[1])
             else:
                 camera_center_x = camera_x + camera_width // 2
                 camera_center_y = camera_y + camera_height // 2
