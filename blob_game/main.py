@@ -10,6 +10,7 @@ from food import Food
 from blob import Blob
 from configValues import *
 from gui import toggle_gui_panel, draw_gui_panel, draw_game, draw_minimap
+import copy
 
 pygame.init()
 pygame.mixer.init()
@@ -75,6 +76,13 @@ def main(config, genomes):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                 toggle_gui_panel()
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if selected_object and selected_object.type == "blob" and selected_object.energy > 30:
+                    new_blob = Blob(selected_object.body.position.x, selected_object.body.position.y, space, size=selected_object.size / 2)
+                    new_blob.energy = selected_object.energy / 2
+                    selected_object.energy = selected_object.energy / 2
+                    blob_objects.append(new_blob)
+            
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
                 pos = pygame_util.get_mouse_pos(window)
                 for blob in blob_objects:
