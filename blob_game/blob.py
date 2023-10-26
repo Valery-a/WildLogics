@@ -9,12 +9,12 @@ from pymunk.autogeometry import march_hard, simplify_curves
 class Blob( ):
     """ blob Sprite with basic acceleration, turning, braking and reverse """
 
-    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 1, view_distance = 55, view_angle = 30, attack_power = 0.5 ):
+    def __init__( self, x, y, space, mass=0.01, rotations=360, heading = 0, size = 1, view_distance = 85, view_angle = 45, attack_power = 0.5 ):
         """ A blob Sprite which pre-rotates up to <rotations> lots of
             angled versions of the image.  Depending on the sprite's
             heading-direction, the correctly angled image is chosen.
             The base blob-image should be pointing North/Up.          """
-        
+                
         # stats
         self.energy = 100
         self.health = 40
@@ -132,7 +132,7 @@ class Blob( ):
     def turn( self, angle_degrees ):
         """ Adjust the angle the blob is heading, if this means using a 
             different blob-image, select that here too """
-        
+        self.energy -= 0.025
         self.body.angle += angle_degrees
         self.heading = self.body.angle
         # Decide which is the correct image to display
@@ -156,7 +156,7 @@ class Blob( ):
         self.energy -= 0.05
         self.body.apply_force_at_local_point((self.speed, 0), (0, 0))
             
-    def blob_is_eating(self, object):
+    def blob_is_eating(self, object, gene):
         if object == self:
             return False
         
@@ -164,12 +164,14 @@ class Blob( ):
             if object.type == 'food':
                 self.energy += self.attack_power / 2
                 object.health -= self.attack_power
+                gene.fitness += 1
             elif object.type == 'blob':
                 self.energy += self.attack_power / 10
                 object.health -= self.attack_power_to_blobs
+                gene.fitness += 0.01
                 
             if object.health < 0:
-                    return True
+                return True
             
         return False
     
@@ -205,8 +207,8 @@ class Blob( ):
     def update( self ):
         """ Sprite update function, calcualtes any new position """
         self.energy -= 0.01
-        lower_acceleration_speed = self.speed - 0.05
-        lower_reverse_speed = self.speed + 0.05
+        lower_acceleration_speed = self.speed - 0.3
+        lower_reverse_speed = self.speed + 0.3
         if self.speed > 0:
             self.speed = max(lower_acceleration_speed, 0)
         else:

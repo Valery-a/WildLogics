@@ -101,7 +101,7 @@ def draw_minimap(blob_objects, food_objects):
     
 def draw_game(blob_objects, food_objects, space, draw_options, scaling, translation):
     window.fill(GREY_COLOR)
-    space.debug_draw(draw_options)
+    #space.debug_draw(draw_options)
     for blob in blob_objects:
         blob.draw(window, zoom_factor=scaling, translation = translation)
         

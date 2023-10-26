@@ -1,16 +1,16 @@
-from re import X
 import pygame
-import math
 import random
 import time
 import pymunk
+import os
+import neat
+import numpy as np
 from pymunk.pygame_util import DrawOptions
 from pymunk import pygame_util
 from food import Food
 from blob import Blob
 from configValues import *
 from gui import toggle_gui_panel, draw_gui_panel, draw_game, draw_minimap
-import copy
 
 pygame.init()
 pygame.mixer.init()
@@ -37,34 +37,46 @@ def generate_random_food():
     return Food(x, y, space, size)
 
 
-def main(config, genomes):
-    amount_of_food_to_spawn = 100
+def eval_genome(genomes, config):
+    networks = []
+    genes = []
+    blob_objects = []
+    
+    for _, g in genomes:
+        random_coords = [random.randint(-WINDOW_WIDTH, WINDOW_WIDTH * 2), random.randint(-WINDOW_HEIGHT, WINDOW_HEIGHT * 2)]
+        net = neat.nn.FeedForwardNetwork.create(g, config)
+        networks.append(net)
+        blob_objects.append(Blob(random_coords[0], random_coords[1], space))
+        g.fitness = 0
+        genes.append(g)
+    
+    amount_of_food_to_spawn = 200
     food_objects = []
     for i in range(amount_of_food_to_spawn):
         random_coords = [random.randint(-WINDOW_WIDTH, WINDOW_WIDTH * 2), random.randint(-WINDOW_HEIGHT, WINDOW_HEIGHT * 2)]
         random_size = (random.uniform(4, 6))
         food_objects.append(Food(random_coords[0], random_coords[1], space, random_size))
-    
-    blob_objects = []
-    player_blob = Blob(400, 500, space)
-    some_blob = Blob(500, 500, space)
-    blob_objects.append(some_blob)
-    blob_objects.append(player_blob)    
         
     clock = pygame.time.Clock()
     done = False
     food_spawn_time = time.time()
     selected_object = None  # Add this variable
     
-    scaling = 1
+    scaling = 0.3
     translation = pymunk.Transform()
     zoomed_in_on_selected_object = False
+    fps = 60
     
     while not done:
         current_time = time.time()
         zoom_in = 0
         zoom_out = 0
         vector_of_translation = [0,0]
+
+        if len(blob_objects) == 0:
+            done = True
+            break
+        
         if current_time - food_spawn_time >= 10:
             food_sprite = generate_random_food()
             food_objects.append(food_sprite)
@@ -73,6 +85,8 @@ def main(config, genomes):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+                pygame.quit()
+                quit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                 toggle_gui_panel()
 
@@ -131,39 +145,59 @@ def main(config, genomes):
             @ pymunk.Transform.translation(-WINDOW_WIDTH // 2, -WINDOW_HEIGHT // 2)
         )
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            player_blob.turn(-0.05)
-        if keys[pygame.K_RIGHT]:
-            player_blob.turn(0.05)
-        if keys[pygame.K_UP]:
-            player_blob.accelerate(0.5)
-        if keys[pygame.K_DOWN]:
-            player_blob.accelerate(-0.5)
+        # keys = pygame.key.get_pressed()
+        # if keys[pygame.K_LEFT]:
+        #     player_blob.turn(-0.05)
+        # if keys[pygame.K_RIGHT]:
+        #     player_blob.turn(0.05)
+        # if keys[pygame.K_UP]:
+        #     player_blob.accelerate(0.5)
+        # if keys[pygame.K_DOWN]:
+        #     player_blob.accelerate(-0.5)
 
-        for blob in blob_objects:
+        for i, blob in enumerate(blob_objects):
             blob.update()
+            genes[i].fitness -= 0.2
+            
+            output = networks[i].activate((
+                blob.health * 0.1, 
+                blob.energy * 0.1, 
+                blob.speed * 0.1, 
+                blob.body.rotation_vector.x * 0.1, 
+                blob.current_nearest_object_distance * 0.1, 
+                blob.current_nearest_object_angle * 0.1,
+                0 if blob.current_nearest_object_type == 'blob' else 1))
+
+            blob.accelerate(output[0])
+            blob.turn(output[1] * 0.1)
 
         for food in food_objects:
             food.update()
 
-        for blob in blob_objects:
-            blob.nearest_object(food_objects + blob_objects)
+        all_objects = food_objects + blob_objects
+        for i, blob in enumerate(blob_objects):
+            objects_to_check = [object for object in all_objects if (blob.body.position.x - (100)) <= object.body.position.x <= (blob.body.position.x + (100)) and \
+               (blob.body.position.y - (100)) <= object.body.position.y <= (blob.body.position.y + (100))]
+            blob.nearest_object(objects_to_check)
             for food in food_objects:
-                if blob.blob_is_eating(food):
+                if blob.blob_is_eating(food, genes[i]):
                     food_objects.remove(food)
                     space.remove(food.shape, food.body)
         
-        for blob in blob_objects:
-            for other_blob in blob_objects:
-                if blob.blob_is_eating(other_blob):
-                    blob_objects.remove(other_blob)
+        for i, blob in enumerate(blob_objects):
+            for j, other_blob in enumerate(blob_objects):
+                if blob.blob_is_eating(other_blob, genes[i]):
+                    blob_objects.pop(j)
                     space.remove(other_blob.body, other_blob.shape, other_blob.mouth_shape, other_blob.field_of_view_shape)
+                    genes.pop(j)
+                    networks.pop(j)
 
         for i, blob in enumerate(blob_objects):
             if blob.energy <= 0:
                 blob_objects.pop(i)
                 space.remove(blob.body, blob.shape, blob.mouth_shape, blob.field_of_view_shape)
+                genes.pop(i)
+                networks.pop(i)
 
         draw_game(blob_objects, food_objects, space, draw_options, scaling, translation)
 
@@ -172,10 +206,21 @@ def main(config, genomes):
         minimap_x = WINDOW_WIDTH - MINIMAP_WIDTH - 10
         window.blit(minimap_surface, (minimap_x, 10))
         pygame.display.flip()
-        space.step(1 / 60.0)
-        clock.tick(60)
+        space.step(1 / fps)
+        clock.tick(fps)
+    
+def run(config_path):
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+    
+    p = neat.Population(config)
+    
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
 
-    pygame.quit()
+    winner = p.run(eval_genome, None)
 
 if __name__ == "__main__":
-    main(0, 0)
+    localdir = os.path.dirname(__file__)
+    config_path = os.path.join(localdir, 'resources', 'config-feedforward.txt')
+    run(config_path)
