@@ -89,13 +89,13 @@ def draw_minimap(blob_objects, food_objects):
     
     for blob in blob_objects:
         pygame.draw.circle(minimap_surface, (255, 0, 0),
-                           (int(blob.body.position.x * MINIMAP_WIDTH / WINDOW_WIDTH),
-                            int(blob.body.position.y * MINIMAP_HEIGHT / WINDOW_HEIGHT)), 2)
+                           (int(blob.body.position.x),
+                            int(blob.body.position.y)), 1)
 
     for food in food_objects:
         pygame.draw.circle(minimap_surface, (0, 255, 0),
-                           (int(food.body.position.x * MINIMAP_WIDTH / WINDOW_WIDTH),
-                            int(food.body.position.y * MINIMAP_HEIGHT / WINDOW_HEIGHT)), 2)
+                           (int(food.body.position.x),
+                            int(food.body.position.y)), 1)
     
     pygame.draw.rect(minimap_surface, (255, 255, 255), (0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT), 2)
     

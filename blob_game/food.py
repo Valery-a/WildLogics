@@ -54,8 +54,8 @@ class Food():
         self.rect.center = (pos)
         self.rect.width = image.get_rect().width
         self.rect.height = image.get_rect().height
-        win.blit(image, (x, y))
-
+        if 0 <= x <= WINDOW_WIDTH and 0 <= y <= WINDOW_HEIGHT:
+            win.blit(image, (x, y))
 
     def is_clicked(self, pos):
         # Check if the point (pos) is within the bounding box of the blob

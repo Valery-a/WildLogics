@@ -194,7 +194,7 @@ class Blob( ):
                     b = object.body.position.x - self.body.position.x
                     angle_to_object = math.atan2(a, b) - math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
                     self.current_nearest_object_distance = round(distance_to_object.distance, 2)
-                    self.current_nearest_object_angle = round(angle_to_object, 2)
+                    self.current_nearest_object_angle = round(abs(angle_to_object), 2)
                     self.current_nearest_object_type = object.type
         
         if not found_object:
@@ -228,4 +228,5 @@ class Blob( ):
             self.rect.center = (pos)
             self.rect.width = current_image.get_rect().width
             self.rect.height = current_image.get_rect().height
-            win.blit(current_image, (x, y))
+            if 0 <= x <= WINDOW_WIDTH and 0 <= y <= WINDOW_HEIGHT:
+                win.blit(current_image, (x, y))

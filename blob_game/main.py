@@ -50,7 +50,7 @@ def eval_genome(genomes, config):
         g.fitness = 0
         genes.append(g)
     
-    amount_of_food_to_spawn = 200
+    amount_of_food_to_spawn = 400
     food_objects = []
     for i in range(amount_of_food_to_spawn):
         random_coords = [random.randint(-WINDOW_WIDTH, WINDOW_WIDTH * 2), random.randint(-WINDOW_HEIGHT, WINDOW_HEIGHT * 2)]
@@ -160,12 +160,12 @@ def eval_genome(genomes, config):
             genes[i].fitness -= 0.2
             
             output = networks[i].activate((
-                blob.health * 0.1, 
-                blob.energy * 0.1, 
-                blob.speed * 0.1, 
-                blob.body.rotation_vector.x * 0.1, 
-                blob.current_nearest_object_distance * 0.1, 
-                blob.current_nearest_object_angle * 0.1,
+                blob.health, 
+                blob.energy, 
+                blob.speed, 
+                blob.body.rotation_vector.x, 
+                blob.current_nearest_object_distance, 
+                blob.current_nearest_object_angle,
                 0 if blob.current_nearest_object_type == 'blob' else 1))
 
             blob.accelerate(output[0])
