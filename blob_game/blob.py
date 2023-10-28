@@ -33,26 +33,17 @@ class Blob( ):
           
         
         # setting up blob images
-        self.images = {}
+        self.generated_image = None
         self.generate_blob()
         self.rot_img = {}
-        self.min_angle = ( 360 / rotations )
-        for name, image in self.images.items():
-            current_image_array = []
-            for i in range( rotations ):
-                # This rotation has to match the angle in radians later
-                # So offet the angle (0 degrees = "north") by 90° to be angled 0-radians (so 0 rad is "east")
-                rotated_image = pygame.transform.rotozoom( image, 360-90-( i*self.min_angle ), 1 )
-                current_image_array.append( rotated_image )
-            
-            self.rot_img[name] = current_image_array
-            
+        self.min_angle = ( 360 / rotations )           
         self.min_angle = math.radians( self.min_angle )   # don't need degrees anymore
+        self.image = pygame.transform.scale_by(pygame.transform.rotate(self.generated_image, 0), self.size * 0.2)
         
         # Setting up rigid body
         self.mass = mass
-        width = self.rot_img['full_image'][0].get_rect().width * 0.3
-        height = self.rot_img['full_image'][0].get_rect().height * 0.46
+        width = self.image.get_rect().width * 0.5
+        height = self.image.get_rect().height
         self.shape = pymunk.Circle(None, width)
         self.moment = pymunk.moment_for_circle(self.mass, 0, width)
         self.body = pymunk.Body(self.mass, self.moment)  
@@ -85,13 +76,10 @@ class Blob( ):
         
         # define image used
         self.heading = self.body.angle                           # pointing right (in radians)
-        self.images['full_image'] = self.rot_img['full_image'][int( self.heading / self.min_angle ) % len( self.rot_img['full_image'] )]
-        #self.images['mouth_image'] = self.rot_img['mouth_image'][int( self.heading / self.min_angle ) % len( self.rot_img['mouth_image'] )]
-        self.images['body_image'] = self.rot_img['body_image'][int( self.heading / self.min_angle ) % len( self.rot_img['body_image'] )]
-        self.rect = self.images['full_image'].get_rect()
+        self.image = pygame.transform.scale_by(pygame.transform.rotate(self.generated_image, -int( self.heading * 180 / math.pi / self.min_angle ) % 360), self.size * 0.2)
+        self.rect = self.generated_image.get_rect()
         
         # masks and position
-        self.body_mask = pygame.mask.from_surface(self.images['full_image'])
         self.rect.center = ( x, y )
     
     def is_clicked(self, pos):
@@ -100,16 +88,8 @@ class Blob( ):
                (self.rect.center[1] - self.rect.height * 0.35) <= pos[1] <= (self.rect.center[1] + self.rect.height * 0.35)
     
     def generate_blob(self):
-        body_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_circle.png' ), self.size).convert_alpha()
-        #mouth_image = pygame.transform.scale_by(pygame.image.load( './resources/blob_mouth_32.png' ), self.size).convert_alpha()
-        self.images['body_image'] = body_image
-        #self.images['mouth_image'] = mouth_image
-        
-        full_image = body_image.copy()
-        for name, image in self.images.items():
-            full_image.blit(image, (0,0))
-            
-        self.images['full_image'] = full_image.convert_alpha()
+        body_image = pygame.image.load( './resources/blob_128.png' ).convert_alpha()    
+        self.generated_image = body_image
 
     def generate_geometry_points(self, surface):
         def sample_func(point):
@@ -136,16 +116,12 @@ class Blob( ):
         self.energy -= 0.025
         self.body.angle += angle_degrees
         self.heading = self.body.angle
+        h_a = self.heading * 180 / math.pi
         # Decide which is the correct image to display
-        image_index = int( self.heading / self.min_angle ) % len( self.rot_img['full_image'] )
-        # Only update the image if it's changed
-        if ( self.images['full_image'] != self.rot_img['full_image'][ image_index ] ):
-            for name, image in self.rot_img.items():
-                self.images['full_image'] = self.rot_img['full_image'][ image_index ]
-                #self.images['mouth_image'] = self.rot_img['mouth_image'][ image_index ]
-                self.images['body_image'] = self.rot_img['body_image'][ image_index ]
+        image_index = int( h_a / self.min_angle ) % 360
+        self.image = pygame.transform.scale_by(pygame.transform.rotate(self.generated_image, -image_index), self.size * 0.2)
                 
-            self.rect = self.images['full_image'].get_rect()
+        self.rect = self.image.get_rect()
 
     def accelerate(self, amount):
         """ Increase the speed either forward or reverse """
@@ -218,16 +194,16 @@ class Blob( ):
         self.turn(0)
         
     def draw(self, win, translation, zoom_factor=1):
-        for name, image in self.images.items():
-            current_image = pygame.transform.scale_by(image, zoom_factor)
-            img_width, img_height = current_image.get_rect().size
-            pos = pymunk.Transform.translation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2) @ pymunk.Transform.scaling(zoom_factor) @ translation @ pymunk.Transform.translation(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
-            x = pos.x - img_width / 2
-            y = pos.y - img_height / 2
-            self.rect.x = x
-            self.rect.y = y
-            self.rect.center = (pos)
-            self.rect.width = current_image.get_rect().width
-            self.rect.height = current_image.get_rect().height
-            if 0 <= x <= WINDOW_WIDTH and 0 <= y <= WINDOW_HEIGHT:
-                win.blit(current_image, (x, y))
+        
+        current_image = pygame.transform.scale_by(self.image, zoom_factor)
+        img_width, img_height = current_image.get_rect().size
+        pos = pymunk.Transform.translation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2) @ pymunk.Transform.scaling(zoom_factor) @ translation @ pymunk.Transform.translation(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2) @ pymunk.Vec2d(self.body.position.x, self.body.position.y)
+        x = pos.x - img_width / 2
+        y = pos.y - img_height / 2
+        self.rect.x = x
+        self.rect.y = y
+        self.rect.center = (pos)
+        self.rect.width = current_image.get_rect().width
+        self.rect.height = current_image.get_rect().height
+        if 0 <= x <= WINDOW_WIDTH and 0 <= y <= WINDOW_HEIGHT:
+            win.blit(current_image, (x, y))

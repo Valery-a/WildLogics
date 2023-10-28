@@ -158,12 +158,12 @@ def eval_genome(genomes, config):
         for i, blob in enumerate(blob_objects):
             blob.update()
             genes[i].fitness -= 0.2
-            
+
             output = networks[i].activate((
                 blob.health, 
-                blob.energy, 
-                blob.speed, 
-                blob.body.rotation_vector.x, 
+                round(blob.energy, 2), 
+                round(blob.speed, 2), 
+                round(blob.body.rotation_vector.x, 2), 
                 blob.current_nearest_object_distance, 
                 blob.current_nearest_object_angle,
                 0 if blob.current_nearest_object_type == 'blob' else 1))
