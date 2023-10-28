@@ -29,7 +29,8 @@ class Blob( ):
         self.speed = 0
         self.max_speed = 10
         self.max_reverse_speed = -self.max_speed / 2
-        self.type = "blob"  
+        self.type = "blob"
+          
         
         # setting up blob images
         self.images = {}
